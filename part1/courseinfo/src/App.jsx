@@ -7,16 +7,22 @@ const Header = (props) => {
   );
 }
 
+const Part = (props) => {
+  // Returns a paragraph of the name of a part and its exercise count
+
+  return <p>{props.name} {props.exercises}</p>;
+}
+
 const Content = (props) => {
-  // Returns an unordered list of the parts and their exercise count
+  // Returns the three parts and its exercise count
 
   return (
     <>
-      <ul>
-        <li>{props.names[0]} {props.exerciseCount[0]}</li>
-        <li>{props.names[1]} {props.exerciseCount[1]}</li>
-        <li>{props.names[2]} {props.exerciseCount[2]}</li>
-      </ul>
+      <div>
+        <Part name={props.names[0]} exercises={props.exerciseCount[0]} />
+        <Part name={props.names[1]} exercises={props.exerciseCount[1]} />
+        <Part name={props.names[2]} exercises={props.exerciseCount[2]} />
+      </div>
     </>
   );
 }
@@ -43,11 +49,14 @@ const App = () => {
   const part3 = 'State of a component'
   const exercises3 = 14
 
+  const parts = [part1, part2, part3]
+  const exercises = [exercises1, exercises2, exercises3]
+
   return (
     <>
       <Header course={course} />
-      <Content names={[part1, part2, part3]} exerciseCount={[exercises1, exercises2, exercises3]}/>
-      <Total total={exercises1 + exercises2 + exercises3} />
+      <Content names={parts} exerciseCount={exercises}/>
+      <Total total={exercises.reduce((a, b) => a + b, 0)} />
     </>
   );
 }
