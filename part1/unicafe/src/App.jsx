@@ -4,10 +4,10 @@ import { useState } from 'react'
 const Header = ({ text }) => <h1>{text}</h1>
 
 // Create a button component
-const Button = ({ title, onPress}) => <button onClick={onPress}>{title}</button>
+const Button = ({ title, onPress }) => <button onClick={onPress}>{title}</button>
 
 // Create a statistic component
-// const Statistic = ({ name, count }) => <p>{name} {count}</p>
+const StatisticLine = ({ text, value }) => <p>{text} {value}</p>
 
 // Create a poll statistics component
 const Statistics = ({ good, neutral, bad }) => {
@@ -21,12 +21,12 @@ const Statistics = ({ good, neutral, bad }) => {
   if (all() > 0) {
     return (
       <div>
-        <p>good {good}</p>
-        <p>neutral {neutral}</p>
-        <p>bad {bad}</p>
-        <p>all {all()}</p>
-        <p>average {avg()}</p>
-        <p>positive {positive() + '%'}</p>
+        <StatisticLine text="good" value={good} />
+        <StatisticLine text="neutral" value={neutral} />
+        <StatisticLine text="bad" value={bad} />
+        <StatisticLine text="all" value={all()} />
+        <StatisticLine text="average" value={avg()} />
+        <StatisticLine text="positive" value={positive() + '%'} />
       </div>
     );
   }
