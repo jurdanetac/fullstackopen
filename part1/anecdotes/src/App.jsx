@@ -12,10 +12,22 @@ const App = () => {
     'The only way to go fast, is to go well.'
   ]
 
+  // keep track of the selected quote
   const [selected, setSelected] = useState(0)
+  // store the vote count for each anecdote
+  const [votes, setVotes] = useState(new Array(anecdotes.length).fill(0))
+
+  const vote = () => {
+    // copy the votes array
+    const updatedVotes = [...votes]
+    // increase the votes by one for the selected quote
+    updatedVotes[selected]++;
+    // update the votes
+    setVotes(updatedVotes)
+  }
 
   // renders another quote
-  const btnAction = () => {
+  const next = () => {
     // random number between 0 and the length of the array
     let random;
 
@@ -31,8 +43,9 @@ const App = () => {
   return (
     <div>
       {anecdotes[selected]}
-      <br />
-      <button onClick={btnAction}>next anecdote</button>
+      <p>has {votes[selected]} votes</p>
+      <button onClick={vote}>vote</button>
+      <button onClick={next}>next anecdote</button>
     </div>
   )
 }
