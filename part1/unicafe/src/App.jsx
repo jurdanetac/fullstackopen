@@ -7,7 +7,28 @@ const Header = ({ text }) => <h1>{text}</h1>
 const Button = ({ title, onPress}) => <button onClick={onPress}>{title}</button>
 
 // Create a statistic component
-const Statistic = ({ name, count }) => <p>{name} {count}</p>
+// const Statistic = ({ name, count }) => <p>{name} {count}</p>
+
+// Create a poll statistics component
+const Statistics = ({ good, neutral, bad }) => {
+  // returns feedback count
+  const all = () => (good + neutral + bad)
+  // returns weighted average of feedback where good (1); neutral (0); bad (-1)
+  const avg = () => ((good * 1) + (neutral * 0) + (bad * -1)) / (all())
+  // returns percentage of positive feedback
+  const positive = () => (good) / (all()) * (100)
+
+  return (
+    <div>
+      <p>good {good}</p>
+      <p>neutral {neutral}</p>
+      <p>bad {bad}</p>
+      <p>all {all()}</p>
+      <p>average {avg()}</p>
+      <p>positive {positive() + '%'}</p>
+    </div>
+  );
+}
 
 const App = () => {
   // save clicks of each button to its own state
@@ -65,13 +86,6 @@ const App = () => {
     )
   }
 
-  // returns feedback count
-  const all = () => (good + neutral + bad)
-  // returns weighted average of feedback where good (1); neutral (0); bad (-1)
-  const avg = () => ((good * 1) + (neutral * 0) + (bad * -1)) / (all())
-  // returns percentage of positive feedback
-  const positive = () => (good) / (all()) * (100)
-
   return (
     <div>
       <Header text='give feedback' />
@@ -79,12 +93,7 @@ const App = () => {
       <Button title='neutral' onPress={onNeutralPress()} />
       <Button title='bad' onPress={onBadPress()} />
       <Header text='statistics' />
-      <Statistic name='good' count={good} />
-      <Statistic name='neutral' count={neutral} />
-      <Statistic name='bad' count={bad} />
-      <Statistic name='all' count={all()} />
-      <Statistic name='average' count={avg()} />
-      <Statistic name='positive' count={positive() + '%'} />
+      <Statistics good={good} neutral={neutral} bad={bad}/>
     </div>
   )
 }
