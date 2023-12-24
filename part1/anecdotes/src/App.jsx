@@ -40,12 +40,19 @@ const App = () => {
     setSelected(random)
   }
 
+  // returns the index of most voted quote
+  const maxVotes = () => votes.indexOf(Math.max(...votes))
+
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       {anecdotes[selected]}
       <p>has {votes[selected]} votes</p>
       <button onClick={vote}>vote</button>
       <button onClick={next}>next anecdote</button>
+      <h1>Anecdote with most votes</h1>
+      {anecdotes[maxVotes()]}
+      <p>has {votes[maxVotes()]} votes</p>
     </div>
   )
 }
