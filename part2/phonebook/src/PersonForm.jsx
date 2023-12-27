@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setNewNumber } ) => {
   const addPerson = (event) => {
     // stop browser from refreshing page
@@ -15,14 +17,21 @@ const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setN
     // array of lowercase names without leading/trailing spaces
     const lowerCaseNames = persons.map((p) => p.name.trim().toLowerCase());
 
+    const newPerson = { name: newName.trim(), number: newNumber }
+
     // verify if typed name exists in phonebook
-    if (lowerCaseNames.includes(newName.trim().toLowerCase())) {
+    if (lowerCaseNames.includes(newPerson.name.toLowerCase())) {
       alert(`${newName} is already added to phonebook`);
       return;
     }
 
-    // add person
-    setPersons(persons.concat({ name: newName , number: newNumber }))
+    // save person in server's db
+    axios
+      .post('http://localhost:3001/persons', newPerson)
+      .then(() => {
+        // add person
+        setPersons(persons.concat(newPerson))
+      })
 
     // clear inputs
     setNewName('')
