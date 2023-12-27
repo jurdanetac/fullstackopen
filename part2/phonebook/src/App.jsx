@@ -7,23 +7,29 @@ const App = () => {
   const [newName, setNewName] = useState('')
 
   const addPerson = (event) => {
-    // stop from refreshing page
+    // stop browser from refreshing page
     event.preventDefault()
-    console.log('button pressed')
+
+    // if empty or if already in phonebook
+    if (!newName) {
+      alert('Enter a name!');
+      return;
+    }
+
+    // array of lowercase names without leading/trailing spaces
+    const lowerCaseNames = persons.map((p) => p.name.trim().toLowerCase());
+
+    // verify if typed name exists in phonebook
+    if (lowerCaseNames.includes(newName.trim().toLowerCase())) {
+      alert(`${newName} is already added to phonebook`);
+      return;
+    }
 
     // add person
     setPersons(persons.concat({ name: newName }))
+
     // clear input
     setNewName('')
-  }
-
-  const handleAddPerson = (event) => {
-    console.log(event)
-
-    // append letter
-    if (event.nativeEvent.inputType === 'insertText') {
-      setNewName(newName + event.nativeEvent.data)
-    }
   }
 
   return (
@@ -31,7 +37,7 @@ const App = () => {
       <h2>Phonebook</h2>
       <form onSubmit={addPerson}>
         <div>
-          name: <input value={newName} onChange={handleAddPerson} />
+          name: <input value={newName} placeholder="enter a name" onChange={(e) => setNewName(e.target.value)} />
         </div>
         <div>
           <button type="submit">add</button>
