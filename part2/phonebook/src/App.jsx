@@ -2,17 +2,21 @@ import { useState } from 'react'
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas' }
+    { name: 'Arto Hellas' , number: '040-1234567' }
   ])
   const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
 
   const addPerson = (event) => {
     // stop browser from refreshing page
     event.preventDefault()
 
-    // if empty or if already in phonebook
+    // if empty inputs
     if (!newName) {
       alert('Enter a name!');
+      return;
+    } else if (!newNumber) {
+      alert('Enter a number!');
       return;
     }
 
@@ -26,10 +30,11 @@ const App = () => {
     }
 
     // add person
-    setPersons(persons.concat({ name: newName }))
+    setPersons(persons.concat({ name: newName , number: newNumber }))
 
-    // clear input
+    // clear inputs
     setNewName('')
+    setNewNumber('')
   }
 
   return (
@@ -40,11 +45,14 @@ const App = () => {
           name: <input value={newName} placeholder="enter a name" onChange={(e) => setNewName(e.target.value)} />
         </div>
         <div>
+          number: <input value={newNumber} placeholder="enter a phone number" onChange={(e) => setNewNumber(e.target.value)} />
+        </div>
+        <div>
           <button type="submit">add</button>
         </div>
       </form>
       <h2>Numbers</h2>
-      {persons.map((p) => <p key={p.name}>{p.name}</p>)}
+      {persons.map((p) => <p key={p.name}>{p.name} {p.number}</p>)}
     </div>
   )
 }
