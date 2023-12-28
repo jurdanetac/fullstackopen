@@ -8,6 +8,9 @@ import Persons from './Persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     personService.getAll()
@@ -16,10 +19,6 @@ const App = () => {
       })
   }, [])
 
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
-  const [search, setSearch] = useState('')
-
   return (
     <div>
       <h2>Phonebook</h2>
@@ -27,7 +26,7 @@ const App = () => {
       <h3>Add a new</h3>
       <PersonForm persons={persons} setPersons={setPersons} newName={newName} setNewName={setNewName} newNumber={newNumber} setNewNumber={setNewNumber} />
       <h3>Numbers</h3>
-      <Persons persons={persons} search={search} />
+      <Persons persons={persons} search={search} setPersons={setPersons} />
     </div>
   )
 }
