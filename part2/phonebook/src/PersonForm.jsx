@@ -14,27 +14,58 @@ const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setN
       return;
     }
 
+    const clearForm = () => {
+      // clear inputs
+      setNewName('')
+      setNewNumber('')
+    }
+
     // array of lowercase names without leading/trailing spaces
     const lowerCaseNames = persons.map((p) => p.name.trim().toLowerCase());
 
+    // person created with data supplied by user on form
     const newPerson = { name: newName.trim(), number: newNumber.trim() }
 
     // verify if typed name exists in phonebook
     if (lowerCaseNames.includes(newPerson.name.toLowerCase())) {
-      alert(`${newName} is already added to phonebook`);
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        // locate person id in db
+        newPerson.id = persons.filter(p => p.name.toLowerCase() === newPerson.name.toLowerCase())[0].id
+
+        // update person in server's db
+        personService
+          .update(newPerson)
+          .then(() => {
+            // copy the array since we must not mutate state directly and
+            // a = b would create a reference not a copy
+            const newPersons = persons.slice();
+            const personIndex = persons.indexOf(persons.filter(p => p.id === newPerson.id)[0])
+
+            newPersons.splice(
+              personIndex, // index of item to replace
+              1, // item count to replace
+              newPerson // item to be replaced with
+            )
+
+            // update local array
+            setPersons(newPersons)}
+          )}
+
+      clearForm();
+
       return;
     }
 
     // save person in server's db
-    personService.create(newPerson)
+    personService
+      .create(newPerson)
       .then(() => {
-        // add person
-        setPersons(persons.concat(newPerson))
+        personService
+          .getAll() // get server's array with generated person id
+          .then(res => setPersons(res.data)) // update local array
       })
 
-    // clear inputs
-    setNewName('')
-    setNewNumber('')
+    clearForm();
   }
 
   return (
