@@ -37,7 +37,7 @@ const App = () => {
           placeholder='search countries by name'
           onChange={() => setSearch(event.target.value)} />
       </p>
-      {search ? <Countries countries={matching} /> : null}
+      {search ? <Countries countries={matching} setMatching={setMatching} /> : null}
     </div>
   );
 }
