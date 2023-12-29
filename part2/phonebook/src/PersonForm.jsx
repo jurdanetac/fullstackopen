@@ -1,6 +1,6 @@
 import personService from './services/persons'
 
-const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setNewNumber, setMessage } ) => {
+const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setNewNumber, setMessage, setError } ) => {
   const addPerson = (event) => {
     // stop browser from refreshing page
     event.preventDefault()
@@ -48,8 +48,13 @@ const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setN
             )
 
             // update local array
-            setPersons(newPersons)}
-          )}
+            setPersons(newPersons)})
+          .catch((error) => {
+            setError(`Information of '${newPerson.name}' has already been removed from server`)
+            setTimeout(() => setError(null), 5000)
+            setPersons(persons.filter(p => p.id !== newPerson.id))
+          })
+      }
 
       clearForm();
 
