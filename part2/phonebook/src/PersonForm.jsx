@@ -1,6 +1,6 @@
 import personService from './services/persons'
 
-const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setNewNumber } ) => {
+const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setNewNumber, setMessage } ) => {
   const addPerson = (event) => {
     // stop browser from refreshing page
     event.preventDefault()
@@ -61,8 +61,12 @@ const PersonForm = ( { persons, setPersons, newName, setNewName, newNumber, setN
       .create(newPerson)
       .then(() => {
         personService
-          .getAll() // get server's array with generated person id
-          .then(res => setPersons(res.data)) // update local array
+          .getAll()  // get server's array with generated person id
+          .then(res => setPersons(res.data))  // update local array
+          .then(() => {  // notify success
+            setMessage(`Added ${newPerson.name}`)
+            setTimeout(() => setMessage(null), 5000)
+          })
       })
 
     clearForm();
