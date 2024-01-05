@@ -67,12 +67,19 @@ const PersonForm = ({
             // update local array
             setPersons(newPersons);
           })
-          .catch(() => {
-            setError(
-              `Information of '${newPerson.name}' has already been removed from server`,
-            );
-            setTimeout(() => setError(null), 5000);
-            setPersons(persons.filter((p) => p.id !== newPerson.id));
+          .catch((error) => {
+            // if person was deleted from server's db
+            if (error.response.status === 404) {
+              setError(
+                `Information of '${newPerson.name}' has already been removed from server`,
+              );
+              setTimeout(() => setError(null), 5000);
+              setPersons(persons.filter((p) => p.id !== newPerson.id));
+              // if validation fails
+            } else {
+              setError(error.response.data.error);
+              setTimeout(() => setError(null), 5000);
+            }
           });
       }
 
