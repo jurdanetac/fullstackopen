@@ -30,6 +30,8 @@ const reducer = (state = initialState, action) => {
       // for each anecdote, if the id is not the same as the one voted, return
       // the anecdote as is else, return the anecdote with one more vote
       return state.map(a => a.id !== anecdote.id ? a : {...a, votes: a.votes + 1})
+    case 'NEW':
+      return [...state, asObject(anecdote.content)]
     default:
       // if the action type is not recognized, return the state as is
       return state
@@ -40,6 +42,13 @@ export const vote = (anecdote) => {
   return {
     type: 'VOTE',
     payload: {...anecdote}
+  }
+}
+
+export const createAnecdote = (content) => {
+  return {
+    type: 'NEW',
+    payload: {content}
   }
 }
 
