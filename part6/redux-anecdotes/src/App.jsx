@@ -21,7 +21,9 @@ const App = () => {
   return (
     <div>
       <h2>Anecdotes</h2>
-      {anecdotes.map(anecdote =>
+      {anecdotes
+        .sort((a, b) => b.votes - a.votes)
+        .map(anecdote =>
         <div key={anecdote.id}>
           <div>
             {anecdote.content}
@@ -30,8 +32,7 @@ const App = () => {
             has {anecdote.votes}
             <button onClick={() => dispatch(vote(anecdote))}>vote</button>
           </div>
-        </div>
-      )}
+        </div>)}
       <h2>create new</h2>
       <form onSubmit={addAnecdote}>
         <div><input name="anecdote" /></div>
