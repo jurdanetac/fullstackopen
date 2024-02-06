@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 const anecdotesAtStart = [
   "If it hurts, do it more often",
   "Adding manpower to a late software project makes it later!",
@@ -19,39 +21,25 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject);
 
-const reducer = (state = initialState, action) => {
-  const anecdote = action.payload;
+const anecdoteSlice = createSlice({
+  name: "anecdotes",
+  initialState,
+  reducers: {
+    vote(state, action) {
+      // extract the id of the voted anecdote
+      const { id } = action.payload;
+      // increment the vote count of the anecdote with the given id by one
+      state.find((anecdote) => anecdote.id === id).votes += 1;
+    },
+    createAnecdote(state, action) {
+      // extract the content of the new anecdote from the action object
+      const content = action.payload;
+      // create a new anecdote object and add it to the state
+      const newAnecdote = asObject(content);
+      state.push(newAnecdote);
+    },
+  },
+});
 
-  // print the action type and the anecdote sent to the reducer
-  console.log(action.type, anecdote);
-
-  switch (action.type) {
-    case "VOTE":
-      // for each anecdote, if the id is not the same as the one voted, return
-      // the anecdote as is else, return the anecdote with one more vote
-      return state.map((a) =>
-        a.id !== anecdote.id ? a : { ...a, votes: a.votes + 1 },
-      );
-    case "NEW":
-      return [...state, asObject(anecdote.content)];
-    default:
-      // if the action type is not recognized, return the state as is
-      return state;
-  }
-};
-
-export const vote = (anecdote) => {
-  return {
-    type: "VOTE",
-    payload: { ...anecdote },
-  };
-};
-
-export const createAnecdote = (content) => {
-  return {
-    type: "NEW",
-    payload: { content },
-  };
-};
-
-export default reducer;
+export const { vote, createAnecdote } = anecdoteSlice.actions;
+export default anecdoteSlice.reducer;
