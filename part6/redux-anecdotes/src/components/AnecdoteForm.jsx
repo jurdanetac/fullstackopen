@@ -2,6 +2,7 @@ import { createAnecdote } from "../reducers/anecdoteReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { notificationChange } from "../reducers/notificationReducer";
 import { useEffect } from "react";
+import anecdoteService from "../services/anecdotes";
 
 const AnecdoteForm = () => {
   const dispatch = useDispatch();
@@ -15,7 +16,7 @@ const AnecdoteForm = () => {
     return () => clearTimeout(timer);
   }, [dispatch, notification]);
 
-  const addAnecdote = (event) => {
+  const addAnecdote = async (event) => {
     // prevent refresh
     event.preventDefault();
 
@@ -25,8 +26,8 @@ const AnecdoteForm = () => {
     // flush the input field
     event.target.anecdote.value = "";
 
-    // dispatch the actions
-    dispatch(createAnecdote(content));
+    const newAnecdote = await anecdoteService.createNew(content);
+    dispatch(createAnecdote(newAnecdote));
     dispatch(notificationChange(`you created '${content}'`));
   };
 
