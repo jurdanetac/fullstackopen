@@ -1,16 +1,15 @@
 import { useSelector, useDispatch } from "react-redux";
 import { voteForAnecdote } from "../reducers/anecdoteReducer";
-import { notificationChange } from "../reducers/notificationReducer";
-import { useEffect } from "react";
+import { setNotification } from "../reducers/notificationReducer";
 
 const AnecdoteList = () => {
-  // get state from store
-  const state = useSelector((state) => state);
-
   // anecdote content must contain filter
-  const filter = state.filter;
+  const filter = useSelector((state) => state.filter);
+
+  const allAnecdotes = useSelector((state) => state.anecdotes);
+
   // anecdotes with filter applied
-  const anecdotes = state.anecdotes.filter((anecdote) =>
+  const anecdotes = allAnecdotes.filter((anecdote) =>
     anecdote.content.trim().toLowerCase().includes(filter.trim().toLowerCase()),
   );
 
@@ -19,18 +18,10 @@ const AnecdoteList = () => {
 
   const voteAnecdote = (anecdote) => {
     // notify user
-    dispatch(notificationChange(`you voted '${anecdote.content}'`));
+    dispatch(setNotification(`you voted '${anecdote.content}'`, 10));
     // dispatch vote action
     dispatch(voteForAnecdote(anecdote));
   };
-
-  // clear notification after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      dispatch(notificationChange(null));
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [state.notification, dispatch]);
 
   return (
     <div>

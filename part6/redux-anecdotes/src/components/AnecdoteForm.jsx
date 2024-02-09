@@ -1,19 +1,9 @@
 import { createNewAnecdote } from "../reducers/anecdoteReducer";
-import { useDispatch, useSelector } from "react-redux";
-import { notificationChange } from "../reducers/notificationReducer";
-import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setNotification } from "../reducers/notificationReducer";
 
 const AnecdoteForm = () => {
   const dispatch = useDispatch();
-  const notification = useSelector((state) => state.notification);
-
-  // clear notification after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      dispatch(notificationChange(null));
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [dispatch, notification]);
 
   const addAnecdote = async (event) => {
     // prevent refresh
@@ -26,7 +16,7 @@ const AnecdoteForm = () => {
     event.target.anecdote.value = "";
 
     dispatch(createNewAnecdote(content));
-    dispatch(notificationChange(`you created '${content}'`));
+    dispatch(setNotification(`you created '${content}'`, 10));
   };
 
   return (
