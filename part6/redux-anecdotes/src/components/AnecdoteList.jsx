@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { vote } from "../reducers/anecdoteReducer";
+import { voteForAnecdote } from "../reducers/anecdoteReducer";
 import { notificationChange } from "../reducers/notificationReducer";
 import { useEffect } from "react";
 
@@ -21,7 +21,7 @@ const AnecdoteList = () => {
     // notify user
     dispatch(notificationChange(`you voted '${anecdote.content}'`));
     // dispatch vote action
-    dispatch(vote(anecdote));
+    dispatch(voteForAnecdote(anecdote));
   };
 
   // clear notification after 5 seconds
