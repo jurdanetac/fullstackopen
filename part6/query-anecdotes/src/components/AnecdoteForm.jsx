@@ -15,6 +15,11 @@ const AnecdoteForm = () => {
     onSuccess: (newAnecdote) => {
       const anecdotes = queryClient.getQueryData(["anecdotes"]);
       queryClient.setQueryData(["anecdotes"], anecdotes.concat(newAnecdote));
+      notificationDispatch({ type: "NEW", data: newAnecdote });
+    },
+    onError: (error) => {
+      // console.error("error creating anecdote", error);
+      notificationDispatch({ type: "ERROR" });
     },
   });
 
@@ -24,7 +29,6 @@ const AnecdoteForm = () => {
     event.target.anecdote.value = "";
     // console.log("new anecdote");
     newAnecdoteMutation.mutate({ content, votes: 0 });
-    notificationDispatch({ type: "NEW", data: { content } });
   };
 
   return (
