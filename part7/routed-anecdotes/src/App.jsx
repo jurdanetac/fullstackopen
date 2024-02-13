@@ -97,27 +97,35 @@ const Footer = () => (
 );
 
 const CreateNew = (props) => {
-  const content = useField("text");
-  const author = useField("text");
-  const info = useField("text");
+  // function that can be used to navigate to a different location
   const navigate = useNavigate();
 
+  // destructure the reset property from the useField hook
+  const { reset: contentReset, ...content } = useField("text");
+  const { reset: authorReset, ...author } = useField("text");
+  const { reset: infoReset, ...info } = useField("text");
+
   const handleSubmit = (e) => {
+    // prevent the form submission from causing a page reload
     e.preventDefault();
+    // create a new anecdote object
     props.addNew({
       content: content.value,
       author: author.value,
       info: info.value,
       votes: 0,
     });
+    // navigate to the home page
     navigate("/");
   };
 
   const resetForm = (event) => {
+    // prevent a page reload
     event.preventDefault();
-    content.reset();
-    author.reset();
-    info.reset();
+    // reset the form fields
+    contentReset();
+    authorReset();
+    infoReset();
   };
 
   return (
