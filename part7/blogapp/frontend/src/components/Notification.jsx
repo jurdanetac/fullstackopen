@@ -1,6 +1,8 @@
+import { useDispatch, useSelector } from "react-redux";
+
 const Notification = ({ message, type }) => {
   const style = {
-    display: message === null ? "none" : "",
+    display: message ? "" : "none",
     color: type === "error" ? "red" : "green",
     background: "lightgrey",
     fontSize: "20px",

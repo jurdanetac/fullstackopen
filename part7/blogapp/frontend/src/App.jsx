@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
-import LoginForm from "./components/LoginForm";
-import BlogForm from "./components/BlogForm";
-
-import Togglable from "./components/Togglable";
 import Blog from "./components/Blog";
-
+import BlogForm from "./components/BlogForm";
+import LoginForm from "./components/LoginForm";
 import Notification from "./components/Notification";
+import Togglable from "./components/Togglable";
+
+import {
+  notificationChange,
+  notificationReset,
+} from "./reducers/notificationReducer";
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -18,9 +22,11 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
 
-  // notifications
-  const [notification, setNotification] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  // store
+  const dispatch = useDispatch();
+  // notification
+  const message = useSelector((state) => state.notification.message);
+  const type = useSelector((state) => state.notification.type);
 
   // creates a reference to the blog form
   const blogFormRef = useRef();
@@ -61,9 +67,14 @@ const App = () => {
 
       console.log(`logged in successfully as ${user.username}`);
     } catch (exception) {
-      setErrorMessage("Wrong username or password");
+      dispatch(
+        notificationChange({
+          type: "error",
+          message: "Wrong username or password",
+        }),
+      );
       setTimeout(() => {
-        setErrorMessage(null);
+        dispatch(notificationReset());
       }, 5000);
     }
   };
@@ -123,9 +134,14 @@ const App = () => {
           setBlogs(updatedBlogs);
 
           // show success to user
-          setNotification(`blog ${blog.title} by ${blog.author} deleted`);
+          dispatch(
+            notificationChange({
+              type: "success",
+              message: `blog ${blog.title} by ${blog.author} deleted`,
+            }),
+          );
           setTimeout(() => {
-            setNotification(null);
+            dispatch(notificationReset());
           }, 5000);
         })
         .catch((error) => {
@@ -141,7 +157,7 @@ const App = () => {
     <div>
       <h2>log in to application</h2>
 
-      <Notification message={errorMessage} type="error" />
+      <Notification message={message} type={type} />
 
       <LoginForm
         username={username}
@@ -166,11 +182,14 @@ const App = () => {
         console.log("blog created successfully");
 
         // show success to user
-        setNotification(
-          `a new blog ${createdBlog.title} by ${createdBlog.author} added`,
+        dispatch(
+          notificationChange({
+            type: "success",
+            message: `a new blog ${createdBlog.title} by ${createdBlog.author} added`,
+          }),
         );
         setTimeout(() => {
-          setNotification(null);
+          dispatch(notificationReset());
         }, 5000);
       });
     } catch (exception) {
@@ -183,7 +202,7 @@ const App = () => {
     <div>
       <h2>blogs</h2>
 
-      <Notification message={notification} type="notification" />
+      <Notification message={message} type={type} />
 
       {user.name ? (
         <p>
