@@ -112,9 +112,11 @@ const App = () => {
         updatedBlog.user = blog.user;
 
         // update the blogs state preserving the order
-        const updatedBlogs = [...blogs];
-        updatedBlogs[blogs.indexOf(blog)].likes += 1;
-        // dispatch(setBlogs(updatedBlogs));
+        const updatedBlogs = blogs.map((blog) =>
+          blog.id !== updatedBlog.id ? blog : updatedBlog,
+        );
+
+        dispatch(setBlogs(updatedBlogs));
       });
     } catch (exception) {
       console.log("exception", exception);
@@ -131,9 +133,10 @@ const App = () => {
           console.log("blog deleted successfully");
 
           // update the blogs state preserving the order
-          const updatedBlogs = [...blogs];
-          updatedBlogs.splice(blogs.indexOf(blog), 1);
-          // dispatch(setBlogs(updatedBlogs));
+          const updatedBlogs = blogs.filter((b) => b.id !== blog.id);
+
+          // update the blogs in the store
+          dispatch(setBlogs(updatedBlogs));
 
           // show success to user
           dispatch(
@@ -180,6 +183,8 @@ const App = () => {
     try {
       blogService.create(blog).then((createdBlog) => {
         console.log("created blog:", createdBlog);
+        // repopulate the user field
+        createdBlog.user = user;
         dispatch(setBlogs(blogs.concat(createdBlog)));
         console.log("blog created successfully");
 
