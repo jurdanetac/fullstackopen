@@ -15,9 +15,9 @@ import {
   notificationReset,
 } from "./reducers/notificationReducer";
 
-const App = () => {
-  const [blogs, setBlogs] = useState([]);
+import { setBlogs } from "./reducers/blogReducer";
 
+const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
@@ -27,13 +27,15 @@ const App = () => {
   // notification
   const message = useSelector((state) => state.notification.message);
   const type = useSelector((state) => state.notification.type);
+  // blogs
+  const blogs = useSelector((state) => state.blogs);
 
   // creates a reference to the blog form
   const blogFormRef = useRef();
 
   // fetches blogs from server
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    blogService.getAll().then((blogs) => dispatch(setBlogs(blogs)));
   }, []);
 
   // checks if user is logged in
@@ -112,7 +114,7 @@ const App = () => {
         // update the blogs state preserving the order
         const updatedBlogs = [...blogs];
         updatedBlogs[blogs.indexOf(blog)].likes += 1;
-        setBlogs(updatedBlogs);
+        // dispatch(setBlogs(updatedBlogs));
       });
     } catch (exception) {
       console.log("exception", exception);
@@ -131,7 +133,7 @@ const App = () => {
           // update the blogs state preserving the order
           const updatedBlogs = [...blogs];
           updatedBlogs.splice(blogs.indexOf(blog), 1);
-          setBlogs(updatedBlogs);
+          // dispatch(setBlogs(updatedBlogs));
 
           // show success to user
           dispatch(
@@ -178,7 +180,7 @@ const App = () => {
     try {
       blogService.create(blog).then((createdBlog) => {
         console.log("created blog:", createdBlog);
-        setBlogs(blogs.concat(createdBlog));
+        dispatch(setBlogs(blogs.concat(createdBlog)));
         console.log("blog created successfully");
 
         // show success to user
