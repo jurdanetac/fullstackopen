@@ -17,11 +17,9 @@ import {
 
 import { setBlogs } from "./reducers/blogReducer";
 
-const App = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
+import { setUser } from "./reducers/userReducer";
 
+const App = () => {
   // store
   const dispatch = useDispatch();
   // notification
@@ -29,6 +27,8 @@ const App = () => {
   const type = useSelector((state) => state.notification.type);
   // blogs
   const blogs = useSelector((state) => state.blogs);
+  // user
+  const user = useSelector((state) => state.user);
 
   // creates a reference to the blog form
   const blogFormRef = useRef();
@@ -44,7 +44,7 @@ const App = () => {
 
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      dispatch(setUser(user));
       blogService.setToken(user.token);
     }
   }, []);
@@ -52,6 +52,8 @@ const App = () => {
   // performs login and saves session to browser
   const handleLogin = async (event) => {
     event.preventDefault();
+    const username = event.target.Username.value;
+    const password = event.target.Password.value;
     console.log("logging in with", username, password);
 
     try {
@@ -63,9 +65,7 @@ const App = () => {
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
       blogService.setToken(user.token);
 
-      setUser(user);
-      setUsername("");
-      setPassword("");
+      dispatch(setUser(user));
 
       console.log(`logged in successfully as ${user.username}`);
     } catch (exception) {
@@ -164,13 +164,7 @@ const App = () => {
 
       <Notification message={message} type={type} />
 
-      <LoginForm
-        username={username}
-        setUsername={setUsername}
-        password={password}
-        setPassword={setPassword}
-        handleLogin={handleLogin}
-      />
+      <LoginForm handleLogin={handleLogin} />
     </div>
   );
 
