@@ -111,7 +111,7 @@ const App = () => {
         // update the blogs state preserving the order
         const updatedBlogs = [...blogs];
         updatedBlogs[blogs.indexOf(blog)].likes += 1;
-        // blogsDispatch({ type: "SET", payload: updatedBlogs });
+        blogsDispatch({ type: "SET", payload: updatedBlogs });
       });
     } catch (exception) {
       console.log("exception", exception);
@@ -130,7 +130,7 @@ const App = () => {
           // update the blogs state preserving the order
           const updatedBlogs = [...blogs];
           updatedBlogs.splice(blogs.indexOf(blog), 1);
-          // blogsDispatch({ type: "SET", payload: updatedBlogs });
+          blogsDispatch({ type: "SET", payload: updatedBlogs });
 
           // show success to user
           notificationDispatch({
