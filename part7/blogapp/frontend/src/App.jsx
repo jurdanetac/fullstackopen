@@ -1,33 +1,40 @@
+// libraries
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+} from "react-router-dom";
 
+// services
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import userService from "./services/users";
 
+// components
 import Blog from "./components/Blog";
 import BlogForm from "./components/BlogForm";
 import LoginForm from "./components/LoginForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 
+// reducers
 import {
   notificationChange,
   notificationReset,
 } from "./reducers/notificationReducer";
-
 import { setBlogs } from "./reducers/blogReducer";
-
 import { setUser } from "./reducers/userReducer";
 
 const App = () => {
   // store
   const dispatch = useDispatch();
-  // notification
   const message = useSelector((state) => state.notification.message);
   const type = useSelector((state) => state.notification.type);
-  // blogs
   const blogs = useSelector((state) => state.blogs);
-  // user
   const user = useSelector((state) => state.user);
 
   // creates a reference to the blog form
@@ -205,11 +212,7 @@ const App = () => {
 
       <Notification message={message} type={type} />
 
-      {user.name ? (
-        <p>
-          {user.name} logged in <button onClick={handleLogout}>logout</button>
-        </p>
-      ) : null}
+      <UserTooltip />
 
       <Togglable
         btnId="add-blog-button"
@@ -237,7 +240,70 @@ const App = () => {
     </div>
   );
 
-  return <>{user === null ? loginForm() : blogForm()}</>;
+  const UserTooltip = () => (
+    <div>
+      {user.name ? (
+        <p>
+          {user.name} logged in <br />{" "}
+          <button onClick={handleLogout}>logout</button>
+        </p>
+      ) : null}
+    </div>
+  );
+
+  const Users = () => {
+    const [users, setUsers] = useState([]);
+
+    // fetches users from server
+    useEffect(() => {
+      userService.getAll().then((users) => setUsers(users));
+    }, []);
+
+    return (
+      <div>
+        <h2>blogs</h2>
+
+        <UserTooltip />
+
+        <h2>Users</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>blogs created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.name}</td>
+                <td>{user.blogs.length}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={user ? blogForm() : <Navigate replace to="/login" />}
+          />
+          <Route path="/users" element={user ? <Users /> : loginForm()} />
+          <Route
+            path="/login"
+            element={user ? <Navigate replace to="/" /> : loginForm()}
+          />
+        </Routes>
+      </Router>
+    </div>
+  );
 };
 
 export default App;

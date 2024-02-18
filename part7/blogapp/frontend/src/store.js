@@ -13,6 +13,6 @@ const store = configureStore({
 });
 
 // print store state to console every time it changes for debugging
-store.subscribe(() => console.log(store.getState()));
+// store.subscribe(() => console.log(store.getState()));
 
 export default store;
