@@ -31,6 +31,8 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
           </div>
           <div>{blog.author}</div>
 
+          {console.log("user", user)}
+          {console.log("blog", blog)}
           {blog.user.username === user.username ? (
             <button id="deleteBlogBtn" onClick={() => handleDelete(blog)}>
               remove

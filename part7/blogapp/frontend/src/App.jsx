@@ -10,8 +10,12 @@ import Togglable from "./components/Togglable";
 import Blog from "./components/Blog";
 import Notification from "./components/Notification";
 
+import { useBlogsValue, useBlogsDispatch } from "./BlogsContext";
+
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
+  const blogs = useBlogsValue();
+  const blogsDispatch = useBlogsDispatch();
+  console.log("blogs", blogs);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +29,9 @@ const App = () => {
 
   // fetches blogs from server
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
+    blogService
+      .getAll()
+      .then((blogs) => blogsDispatch({ type: "SET", payload: blogs }));
   }, []);
 
   // checks if user is logged in
@@ -105,7 +111,7 @@ const App = () => {
         // update the blogs state preserving the order
         const updatedBlogs = [...blogs];
         updatedBlogs[blogs.indexOf(blog)].likes += 1;
-        setBlogs(updatedBlogs);
+        // blogsDispatch({ type: "SET", payload: updatedBlogs });
       });
     } catch (exception) {
       console.log("exception", exception);
@@ -124,7 +130,7 @@ const App = () => {
           // update the blogs state preserving the order
           const updatedBlogs = [...blogs];
           updatedBlogs.splice(blogs.indexOf(blog), 1);
-          setBlogs(updatedBlogs);
+          // blogsDispatch({ type: "SET", payload: updatedBlogs });
 
           // show success to user
           notificationDispatch({
@@ -171,8 +177,10 @@ const App = () => {
     // logic for blog creation
     try {
       blogService.create(blog).then((createdBlog) => {
+        // repopulate user field
+        createdBlog.user = { username: user.username, name: user.name };
         console.log("created blog:", createdBlog);
-        setBlogs(blogs.concat(createdBlog));
+        blogsDispatch({ type: "SET", payload: blogs.concat(createdBlog) });
         console.log("blog created successfully");
 
         // show success to user
