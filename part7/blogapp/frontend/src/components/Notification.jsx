@@ -1,9 +1,6 @@
-import { useNotificationValue } from "../NotificationContext";
+import { useDispatch, useSelector } from "react-redux";
 
-const Notification = () => {
-  const notification = useNotificationValue();
-  const { message, type } = notification;
-
+const Notification = ({ message, type }) => {
   const style = {
     display: message ? "" : "none",
     color: type === "error" ? "red" : "green",

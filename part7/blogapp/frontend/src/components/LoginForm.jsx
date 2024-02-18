@@ -13,7 +13,7 @@ const LoginForm = ({ handleLogin }) => {
           value={username}
           name="Username"
           id="username"
-          onChange={({ target }) => setUsername(target.value)}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
       </div>
@@ -24,7 +24,7 @@ const LoginForm = ({ handleLogin }) => {
           value={password}
           name="Password"
           id="password"
-          onChange={({ target }) => setPassword(target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
       </div>

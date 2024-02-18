@@ -1,36 +1,41 @@
 import { useState, useEffect, useRef } from "react";
-import { useNotificationDispatch } from "./NotificationContext";
+import { useDispatch, useSelector } from "react-redux";
 
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
-import LoginForm from "./components/LoginForm";
-import BlogForm from "./components/BlogForm";
-import Togglable from "./components/Togglable";
 import Blog from "./components/Blog";
+import BlogForm from "./components/BlogForm";
+import LoginForm from "./components/LoginForm";
 import Notification from "./components/Notification";
+import Togglable from "./components/Togglable";
 
-import { useBlogsValue, useBlogsDispatch } from "./BlogsContext";
-import { useUserValue, useUserDispatch } from "./UserContext";
+import {
+  notificationChange,
+  notificationReset,
+} from "./reducers/notificationReducer";
+
+import { setBlogs } from "./reducers/blogReducer";
+
+import { setUser } from "./reducers/userReducer";
 
 const App = () => {
-  // stores
+  // store
+  const dispatch = useDispatch();
+  // notification
+  const message = useSelector((state) => state.notification.message);
+  const type = useSelector((state) => state.notification.type);
   // blogs
-  const blogs = useBlogsValue();
-  const blogsDispatch = useBlogsDispatch();
+  const blogs = useSelector((state) => state.blogs);
   // user
-  const user = useUserValue();
-  const userDispatch = useUserDispatch();
-  // notifications
-  const notificationDispatch = useNotificationDispatch();
+  const user = useSelector((state) => state.user);
+
   // creates a reference to the blog form
   const blogFormRef = useRef();
 
   // fetches blogs from server
   useEffect(() => {
-    blogService
-      .getAll()
-      .then((blogs) => blogsDispatch({ type: "SET", payload: blogs }));
+    blogService.getAll().then((blogs) => dispatch(setBlogs(blogs)));
   }, []);
 
   // checks if user is logged in
@@ -39,7 +44,7 @@ const App = () => {
 
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      userDispatch({ type: "SET", payload: user });
+      dispatch(setUser(user));
       blogService.setToken(user.token);
     }
   }, []);
@@ -60,19 +65,18 @@ const App = () => {
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
       blogService.setToken(user.token);
 
-      userDispatch({ type: "SET", payload: user });
+      dispatch(setUser(user));
 
       console.log(`logged in successfully as ${user.username}`);
     } catch (exception) {
-      notificationDispatch({
-        type: "SET",
-        payload: {
-          message: "Wrong username or password",
+      dispatch(
+        notificationChange({
           type: "error",
-        },
-      });
+          message: "Wrong username or password",
+        }),
+      );
       setTimeout(() => {
-        notificationDispatch({ type: "CLEAR" });
+        dispatch(notificationReset());
       }, 5000);
     }
   };
@@ -108,9 +112,11 @@ const App = () => {
         updatedBlog.user = blog.user;
 
         // update the blogs state preserving the order
-        const updatedBlogs = [...blogs];
-        updatedBlogs[blogs.indexOf(blog)].likes += 1;
-        blogsDispatch({ type: "SET", payload: updatedBlogs });
+        const updatedBlogs = blogs.map((blog) =>
+          blog.id !== updatedBlog.id ? blog : updatedBlog,
+        );
+
+        dispatch(setBlogs(updatedBlogs));
       });
     } catch (exception) {
       console.log("exception", exception);
@@ -127,20 +133,20 @@ const App = () => {
           console.log("blog deleted successfully");
 
           // update the blogs state preserving the order
-          const updatedBlogs = [...blogs];
-          updatedBlogs.splice(blogs.indexOf(blog), 1);
-          blogsDispatch({ type: "SET", payload: updatedBlogs });
+          const updatedBlogs = blogs.filter((b) => b.id !== blog.id);
+
+          // update the blogs in the store
+          dispatch(setBlogs(updatedBlogs));
 
           // show success to user
-          notificationDispatch({
-            type: "SET",
-            payload: {
-              message: `blog ${blog.title} by ${blog.author} deleted`,
+          dispatch(
+            notificationChange({
               type: "success",
-            },
-          });
+              message: `blog ${blog.title} by ${blog.author} deleted`,
+            }),
+          );
           setTimeout(() => {
-            notificationDispatch({ type: "CLEAR" });
+            dispatch(notificationReset());
           }, 5000);
         })
         .catch((error) => {
@@ -156,7 +162,7 @@ const App = () => {
     <div>
       <h2>log in to application</h2>
 
-      <Notification />
+      <Notification message={message} type={type} />
 
       <LoginForm handleLogin={handleLogin} />
     </div>
@@ -170,22 +176,21 @@ const App = () => {
     // logic for blog creation
     try {
       blogService.create(blog).then((createdBlog) => {
-        // repopulate user field
-        createdBlog.user = { username: user.username, name: user.name };
         console.log("created blog:", createdBlog);
-        blogsDispatch({ type: "SET", payload: blogs.concat(createdBlog) });
+        // repopulate the user field
+        createdBlog.user = user;
+        dispatch(setBlogs(blogs.concat(createdBlog)));
         console.log("blog created successfully");
 
         // show success to user
-        notificationDispatch({
-          type: "SET",
-          payload: {
-            message: `a new blog ${createdBlog.title} by ${createdBlog.author} added`,
+        dispatch(
+          notificationChange({
             type: "success",
-          },
-        });
+            message: `a new blog ${createdBlog.title} by ${createdBlog.author} added`,
+          }),
+        );
         setTimeout(() => {
-          notificationDispatch({ type: "CLEAR" });
+          dispatch(notificationReset());
         }, 5000);
       });
     } catch (exception) {
@@ -198,7 +203,7 @@ const App = () => {
     <div>
       <h2>blogs</h2>
 
-      <Notification />
+      <Notification message={message} type={type} />
 
       {user.name ? (
         <p>
