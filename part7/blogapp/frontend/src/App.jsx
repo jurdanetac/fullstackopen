@@ -11,19 +11,18 @@ import Blog from "./components/Blog";
 import Notification from "./components/Notification";
 
 import { useBlogsValue, useBlogsDispatch } from "./BlogsContext";
+import { useUserValue, useUserDispatch } from "./UserContext";
 
 const App = () => {
+  // stores
+  // blogs
   const blogs = useBlogsValue();
   const blogsDispatch = useBlogsDispatch();
-  console.log("blogs", blogs);
-
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState(null);
-
+  // user
+  const user = useUserValue();
+  const userDispatch = useUserDispatch();
   // notifications
   const notificationDispatch = useNotificationDispatch();
-
   // creates a reference to the blog form
   const blogFormRef = useRef();
 
@@ -40,7 +39,7 @@ const App = () => {
 
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      userDispatch({ type: "SET", payload: user });
       blogService.setToken(user.token);
     }
   }, []);
@@ -48,6 +47,8 @@ const App = () => {
   // performs login and saves session to browser
   const handleLogin = async (event) => {
     event.preventDefault();
+    const username = event.target.Username.value;
+    const password = event.target.Password.value;
     console.log("logging in with", username, password);
 
     try {
@@ -59,9 +60,7 @@ const App = () => {
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
       blogService.setToken(user.token);
 
-      setUser(user);
-      setUsername("");
-      setPassword("");
+      userDispatch({ type: "SET", payload: user });
 
       console.log(`logged in successfully as ${user.username}`);
     } catch (exception) {
@@ -159,13 +158,7 @@ const App = () => {
 
       <Notification />
 
-      <LoginForm
-        username={username}
-        setUsername={setUsername}
-        password={password}
-        setPassword={setPassword}
-        handleLogin={handleLogin}
-      />
+      <LoginForm handleLogin={handleLogin} />
     </div>
   );
 
