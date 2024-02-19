@@ -17,6 +17,7 @@ import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 import Users from "./components/Users";
 import User from "./components/User";
+import BlogDetails from "./components/BlogDetails";
 
 // reducers
 import {
@@ -247,6 +248,20 @@ const App = () => {
         />
         <Route path="/users" element={user ? <Users /> : loginForm()} />
         <Route path="/users/:id" element={user ? <User /> : loginForm()} />
+        <Route
+          path="/blogs"
+          element={
+            user ? (
+              <Navigate replace to="/" />
+            ) : (
+              <Navigate replace to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/blogs/:id"
+          element={user ? <BlogDetails handleLike={handleLike} /> : loginForm()}
+        />
         <Route
           path="/login"
           element={user ? <Navigate replace to="/" /> : loginForm()}
