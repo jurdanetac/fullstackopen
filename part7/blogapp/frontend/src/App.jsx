@@ -1,13 +1,7 @@
 // libraries
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Link, Navigate, useMatch } from "react-router-dom";
 
 // services
 import blogService from "./services/blogs";
@@ -17,9 +11,12 @@ import userService from "./services/users";
 // components
 import Blog from "./components/Blog";
 import BlogForm from "./components/BlogForm";
+import Header from "./components/Header";
 import LoginForm from "./components/LoginForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
+import Users from "./components/Users";
+import User from "./components/User";
 
 // reducers
 import {
@@ -30,7 +27,7 @@ import { setBlogs } from "./reducers/blogReducer";
 import { setUser } from "./reducers/userReducer";
 
 const App = () => {
-  // store
+  // store (Redux)
   const dispatch = useDispatch();
   const message = useSelector((state) => state.notification.message);
   const type = useSelector((state) => state.notification.type);
@@ -208,12 +205,6 @@ const App = () => {
   // generates a form page to add a blog for the user
   const blogForm = () => (
     <div>
-      <h2>blogs</h2>
-
-      <Notification message={message} type={type} />
-
-      <UserTooltip />
-
       <Togglable
         btnId="add-blog-button"
         buttonLabel="create new blog"
@@ -240,68 +231,27 @@ const App = () => {
     </div>
   );
 
-  const UserTooltip = () => (
-    <div>
-      {user.name ? (
-        <p>
-          {user.name} logged in <br />{" "}
-          <button onClick={handleLogout}>logout</button>
-        </p>
-      ) : null}
-    </div>
-  );
-
-  const Users = () => {
-    const [users, setUsers] = useState([]);
-
-    // fetches users from server
-    useEffect(() => {
-      userService.getAll().then((users) => setUsers(users));
-    }, []);
-
-    return (
-      <div>
-        <h2>blogs</h2>
-
-        <UserTooltip />
-
-        <h2>Users</h2>
-
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>blogs created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.blogs.length}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
   return (
     <div>
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={user ? blogForm() : <Navigate replace to="/login" />}
-          />
-          <Route path="/users" element={user ? <Users /> : loginForm()} />
-          <Route
-            path="/login"
-            element={user ? <Navigate replace to="/" /> : loginForm()}
-          />
-        </Routes>
-      </Router>
+      <Header
+        user={user}
+        message={message}
+        type={type}
+        handleLogout={handleLogout}
+      />
+
+      <Routes>
+        <Route
+          path="/"
+          element={user ? blogForm() : <Navigate replace to="/login" />}
+        />
+        <Route path="/users" element={user ? <Users /> : loginForm()} />
+        <Route path="/users/:id" element={user ? <User /> : loginForm()} />
+        <Route
+          path="/login"
+          element={user ? <Navigate replace to="/" /> : loginForm()}
+        />
+      </Routes>
     </div>
   );
 };
