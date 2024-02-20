@@ -4,6 +4,7 @@ import blogService from "../services/blogs";
 
 const BlogDetails = ({ handleLike }) => {
   const [blogInUrl, setBlogInUrl] = useState(null);
+  const [comment, setComment] = useState("");
 
   // if user is detected on url, fetch user from server
   const match = useMatch("/blogs/:id");
@@ -26,6 +27,16 @@ const BlogDetails = ({ handleLike }) => {
     setBlogInUrl({ ...blog, likes: blog.likes + 1 });
   };
 
+  const handleComment = async (e) => {
+    e.preventDefault();
+    await blogService.comment(blogInUrl.id, comment);
+    setBlogInUrl({
+      ...blogInUrl,
+      comments: blogInUrl.comments.concat(comment),
+    });
+    setComment("");
+  };
+
   return (
     <div>
       <h2>{blogInUrl.title}</h2>
@@ -36,6 +47,18 @@ const BlogDetails = ({ handleLike }) => {
       </p>
       <p>added by {blogInUrl.user.name}</p>
       <h3>comments</h3>
+      <form>
+        <input
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          name="comment"
+          type="text"
+          placeholder="lol"
+        />
+        <button type="submit" onClick={(e) => handleComment(e)}>
+          add comment
+        </button>
+      </form>
       <ul>
         {blogInUrl.comments.map((comment, index) => (
           <li key={index}>{comment}</li>
