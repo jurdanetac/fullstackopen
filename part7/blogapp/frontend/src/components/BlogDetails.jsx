@@ -35,6 +35,12 @@ const BlogDetails = ({ handleLike }) => {
         <button onClick={() => likeBlog(blogInUrl)}>like</button>
       </p>
       <p>added by {blogInUrl.user.name}</p>
+      <h3>comments</h3>
+      <ul>
+        {blogInUrl.comments.map((comment, index) => (
+          <li key={index}>{comment}</li>
+        ))}
+      </ul>
     </div>
   );
 };

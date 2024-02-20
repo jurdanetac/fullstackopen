@@ -71,4 +71,25 @@ blogsRouter.put("/:id", async (request, response) => {
   response.status(200).end();
 });
 
+blogsRouter.post("/:id/", async (request, response) => {
+  const { id } = request.params;
+  const { body } = request;
+
+  const blog = await Blog.findById(id);
+
+  if (!blog) {
+    return response.status(400).json({ error: "bad request: no such blog" });
+  }
+
+  if (!body.comment) {
+    return response.status(400).json({ error: "bad request: no comment" });
+  }
+
+  await Blog.findByIdAndUpdate(id, {
+    $push: { comments: body.comment },
+  });
+
+  response.status(200).end();
+});
+
 module.exports = blogsRouter;
