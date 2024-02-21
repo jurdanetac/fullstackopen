@@ -27,6 +27,17 @@ import {
 import { setBlogs } from "./reducers/blogReducer";
 import { setUser } from "./reducers/userReducer";
 
+// styles
+import {
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+} from "@mui/material";
+
 const App = () => {
   // store (Redux)
   const dispatch = useDispatch();
@@ -166,9 +177,8 @@ const App = () => {
   const loginForm = () => (
     <div>
       <h2>log in to application</h2>
-
       <Notification message={message} type={type} />
-
+      <br />
       <LoginForm handleLogin={handleLogin} />
     </div>
   );
@@ -215,59 +225,65 @@ const App = () => {
         <BlogForm createBlog={addBlog} />
       </Togglable>
 
-      <div className="blogs">
-        {blogs
-          .map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
-              handleLike={handleLike}
-              handleDelete={handleDelete}
-              user={user}
-              className="blog"
-            />
-          ))
-          .sort((a, b) => b.props.blog.likes - a.props.blog.likes)}
-      </div>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableBody>
+            {blogs
+              .map((blog) => (
+                <TableRow key={blog.id}>
+                  <TableCell align="left">
+                    <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+                  </TableCell>
+                  <TableCell align="right">{blog.author}</TableCell>
+                </TableRow>
+              ))
+              .sort((a, b) => b.likes - a.likes)}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 
   return (
-    <div>
-      <Header
-        user={user}
-        message={message}
-        type={type}
-        handleLogout={handleLogout}
-      />
+    <Container>
+      <div>
+        <Header
+          user={user}
+          message={message}
+          type={type}
+          handleLogout={handleLogout}
+        />
 
-      <Routes>
-        <Route
-          path="/"
-          element={user ? blogForm() : <Navigate replace to="/login" />}
-        />
-        <Route path="/users" element={user ? <Users /> : loginForm()} />
-        <Route path="/users/:id" element={user ? <User /> : loginForm()} />
-        <Route
-          path="/blogs"
-          element={
-            user ? (
-              <Navigate replace to="/" />
-            ) : (
-              <Navigate replace to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/blogs/:id"
-          element={user ? <BlogDetails handleLike={handleLike} /> : loginForm()}
-        />
-        <Route
-          path="/login"
-          element={user ? <Navigate replace to="/" /> : loginForm()}
-        />
-      </Routes>
-    </div>
+        <Routes>
+          <Route
+            path="/"
+            element={user ? blogForm() : <Navigate replace to="/login" />}
+          />
+          <Route path="/users" element={user ? <Users /> : loginForm()} />
+          <Route path="/users/:id" element={user ? <User /> : loginForm()} />
+          <Route
+            path="/blogs"
+            element={
+              user ? (
+                <Navigate replace to="/" />
+              ) : (
+                <Navigate replace to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/blogs/:id"
+            element={
+              user ? <BlogDetails handleLike={handleLike} /> : loginForm()
+            }
+          />
+          <Route
+            path="/login"
+            element={user ? <Navigate replace to="/" /> : loginForm()}
+          />
+        </Routes>
+      </div>
+    </Container>
   );
 };
 

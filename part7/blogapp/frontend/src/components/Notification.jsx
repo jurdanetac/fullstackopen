@@ -1,22 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
+import { Alert } from "@mui/material";
 
 const Notification = ({ message, type }) => {
-  const style = {
-    display: message ? "" : "none",
-    color: type === "error" ? "red" : "green",
-    background: "lightgrey",
-    fontSize: "20px",
-    borderStyle: "solid",
-    borderRadius: "5px",
-    padding: "10px",
-    marginBottom: "10px",
-  };
+  if (!message) {
+    return null;
+  }
 
-  return (
-    <h2 style={style} className={type}>
-      {message}
-    </h2>
-  );
+  return <Alert severity={type}>{message}</Alert>;
 };
 
 export default Notification;

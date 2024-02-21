@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useMatch } from "react-router-dom";
 import blogService from "../services/blogs";
+import { Button, TextField } from "@mui/material";
 
 const BlogDetails = ({ handleLike }) => {
   const [blogInUrl, setBlogInUrl] = useState(null);
@@ -43,21 +44,28 @@ const BlogDetails = ({ handleLike }) => {
       <a href={blogInUrl.url}>{blogInUrl.url}</a>
       <p>
         {blogInUrl.likes} likes{" "}
-        <button onClick={() => likeBlog(blogInUrl)}>like</button>
+        <Button variant="contained" onClick={() => likeBlog(blogInUrl)}>
+          like
+        </Button>
       </p>
       <p>added by {blogInUrl.user.name}</p>
       <h3>comments</h3>
       <form>
-        <input
+        <TextField
+          size="small"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           name="comment"
           type="text"
           placeholder="lol"
         />
-        <button type="submit" onClick={(e) => handleComment(e)}>
+        <Button
+          variant="contained"
+          type="submit"
+          onClick={(e) => handleComment(e)}
+        >
           add comment
-        </button>
+        </Button>
       </form>
       <ul>
         {blogInUrl.comments.map((comment, index) => (
