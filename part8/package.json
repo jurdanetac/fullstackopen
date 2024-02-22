@@ -1,0 +1,24 @@
+{
+  "name": "part8",
+  "version": "1.0.0",
+  "description": "My submissions for Full Stack Open's GraphQL part",
+  "main": "library-backend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node library-backend.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jurdanetac/fullstackopen.git"
+  },
+  "author": "jurdanetac",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jurdanetac/fullstackopen/issues"
+  },
+  "homepage": "https://github.com/jurdanetac/fullstackopen#readme",
+  "dependencies": {
+    "@apollo/server": "^4.10.0",
+    "graphql": "^16.8.1"
+  }
+}
