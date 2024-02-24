@@ -18,9 +18,20 @@ const App = () => {
     }
   `;
 
-  const result = useQuery(ALL_AUTHORS);
+  const ALL_BOOKS = gql`
+    query {
+      allBooks {
+        title
+        author
+        published
+      }
+    }
+  `;
 
-  if (result.loading) {
+  const authors = useQuery(ALL_AUTHORS);
+  const books = useQuery(ALL_BOOKS);
+
+  if (authors.loading || books.loading) {
     return <div>loading...</div>;
   }
 
@@ -39,9 +50,12 @@ const App = () => {
         <Routes>
           <Route
             path="/authors"
-            element={<Authors authors={result.data.allAuthors} />}
+            element={<Authors authors={authors.data.allAuthors} />}
           />
-          <Route path="/books" element={<Books />} />
+          <Route
+            path="/books"
+            element={<Books books={books.data.allBooks} />}
+          />
         </Routes>
       </div>
     </Router>
