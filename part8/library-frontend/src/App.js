@@ -1,32 +1,14 @@
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
+import NewBook from "./components/NewBook";
+import { ALL_AUTHORS, ALL_BOOKS } from "./queries";
 
 const App = () => {
   const padding = {
     padding: 5,
   };
-
-  const ALL_AUTHORS = gql`
-    query {
-      allAuthors {
-        name
-        born
-        bookCount
-      }
-    }
-  `;
-
-  const ALL_BOOKS = gql`
-    query {
-      allBooks {
-        title
-        author
-        published
-      }
-    }
-  `;
 
   const authors = useQuery(ALL_AUTHORS);
   const books = useQuery(ALL_BOOKS);
@@ -44,6 +26,9 @@ const App = () => {
         <Link style={padding} to="/books">
           books
         </Link>
+        <Link style={padding} to="/add">
+          add book
+        </Link>
       </div>
 
       <div>
@@ -56,6 +41,7 @@ const App = () => {
             path="/books"
             element={<Books books={books.data.allBooks} />}
           />
+          <Route path="/add" element={<NewBook />} />
         </Routes>
       </div>
     </Router>
