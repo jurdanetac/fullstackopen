@@ -1,3 +1,4 @@
+import Select from "react-select";
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { UPDATE_AUTHOR, ALL_AUTHORS } from "../queries";
@@ -16,13 +17,30 @@ const Authors = ({ authors }) => {
     // change the author's birthyear
     updateAuthor({
       variables: {
-        name: author,
+        name: author.value,
         setBornTo: parseInt(birthyear),
       },
     });
     // clear the input fields
     setAuthor("");
     setBirthyear("");
+  };
+
+  const AuthorsList = () => {
+    const options = authors.map((a) => {
+      return {
+        value: a.name,
+        label: a.name,
+      };
+    });
+
+    return (
+      <Select
+        options={options}
+        value={author}
+        onChange={(choice) => setAuthor(choice)}
+      />
+    );
   };
 
   return (
@@ -47,14 +65,7 @@ const Authors = ({ authors }) => {
 
       <h2>Set birthyear</h2>
       <form onSubmit={submit}>
-        <div>
-          name
-          <input
-            type="text"
-            value={author}
-            onChange={({ target }) => setAuthor(target.value)}
-          />
-        </div>
+        <AuthorsList />
         <div>
           birthyear
           <input
