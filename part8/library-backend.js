@@ -122,7 +122,13 @@ const resolvers = {
         try {
           await author.save();
         } catch (error) {
-          throw new GraphQLError("Saving author failed", {
+          let errorMessage = "Saving author failed";
+
+          if (author.name.length < 4) {
+            errorMessage = "Author name must be at least 4 characters long";
+          }
+
+          throw new GraphQLError(errorMessage, {
             extensions: {
               code: "BAD_USER_INPUT",
               invalidArgs: author.name,
@@ -136,11 +142,16 @@ const resolvers = {
 
       // save book to db
       try {
-        // if we save the result to local array with a then, the author field
-        // is going to be a reference
         await book.save();
       } catch (error) {
-        throw new GraphQLError("Saving book failed", {
+        const doesBookExist = await Book.findOne({ title: args.title });
+        let errorMessage = "Saving book failed";
+
+        if (doesBookExist) {
+          errorMessage = "Book already exists";
+        }
+
+        throw new GraphQLError(errorMessage, {
           extensions: {
             code: "BAD_USER_INPUT",
             invalidArgs: args.title,
