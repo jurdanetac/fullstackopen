@@ -25,17 +25,6 @@ mongoose
     console.log("error connection to MongoDB:", error.message);
   });
 
-// fetch authors and books from server's db
-let authors;
-let books;
-
-Author.find({}).then((result) => {
-  authors = result;
-});
-Book.find({}).then((result) => {
-  books = result;
-});
-
 // define schema and resolvers
 const typeDefs = `
   type Book {
@@ -74,44 +63,54 @@ const typeDefs = `
 `;
 const resolvers = {
   Query: {
-    bookCount: () => books.length,
-    authorCount: () => authors.length,
-    allBooks: (root, args) => {
+    bookCount: async () => await Book.countDocuments({}),
+    authorCount: async () => await Author.countDocuments({}),
+    allBooks: async (root, args) => {
       if (args.author && !args.genre) {
-        return books.filter((book) => book.author === args.author);
+        const author = await Author.findOne({ name: args.author });
+        const books = await Book.find({ author });
+
+        for (book of books) {
+          book.author = author;
+        }
+
+        return books;
       } else if (args.genre && !args.author) {
-        const booksOfGenre = [];
+        const books = await Book.find({ genres: args.genre });
 
-        // each book
-        books.forEach((book) => {
-          // check if any of the genres of the book matches the query
-          if (book.genres.includes(args.genre)) {
-            booksOfGenre.push(book);
-          }
-        });
+        for (book of books) {
+          const author = await Author.findById(book.author);
+          book.author = author;
+        }
 
-        return booksOfGenre;
+        return books;
       } else if (args.genre && args.author) {
-        const booksOfGenreOfAuthor = [];
+        const author = await Author.findOne({ name: args.author });
+        const books = await Book.find({ author, genres: args.genre });
 
-        // each book
-        books.forEach((book) => {
-          // check if any of the genres of the book matches the query
-          if (book.author === args.author && book.genres.includes(args.genre)) {
-            booksOfGenreOfAuthor.push(book);
-          }
-        });
+        for (book of books) {
+          book.author = author;
+        }
 
-        return booksOfGenreOfAuthor;
+        return books;
       } else {
+        const books = await Book.find({});
+
+        for (book of books) {
+          const author = await Author.findById(book.author);
+          book.author = author;
+        }
+
         return books;
       }
     },
-    allAuthors: () => authors,
+    allAuthors: async () => await Author.find({}),
   },
   Author: {
-    bookCount: (root) =>
-      books.filter((book) => book.author === root.name).length,
+    bookCount: async (root) => {
+      const books = await Book.find({ author: root._id });
+      return books.length;
+    },
   },
   Mutation: {
     addBook: async (root, args) => {
@@ -122,7 +121,6 @@ const resolvers = {
 
         try {
           await author.save();
-          authors.concat(author);
         } catch (error) {
           throw new GraphQLError("Saving author failed", {
             extensions: {
@@ -138,9 +136,9 @@ const resolvers = {
 
       // save book to db
       try {
-        book.save().then((result) => {
-          books = books.concat(result);
-        });
+        // if we save the result to local array with a then, the author field
+        // is going to be a reference
+        await book.save();
       } catch (error) {
         throw new GraphQLError("Saving book failed", {
           extensions: {
@@ -165,8 +163,6 @@ const resolvers = {
 
       // change birthyear of author
       author.born = setBornTo;
-      // update local authors array
-      authors = authors.map((a) => (a.name === name ? author : a));
       // persist changes to db
       return await author.save();
     },
