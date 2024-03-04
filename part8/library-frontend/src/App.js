@@ -1,14 +1,27 @@
 import { useQuery, useApolloClient } from "@apollo/client";
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+} from "react-router-dom";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import LoginForm from "./components/LoginForm";
-import { ALL_AUTHORS, ALL_BOOKS } from "./queries";
+import Recommend from "./components/Recommend";
+import { ALL_AUTHORS, ALL_BOOKS, ME } from "./queries";
 
 const App = () => {
   const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("library-user-token");
+    setToken(token);
+  }, []);
+
   const client = useApolloClient();
 
   const padding = {
@@ -17,6 +30,7 @@ const App = () => {
 
   const authors = useQuery(ALL_AUTHORS);
   const books = useQuery(ALL_BOOKS);
+  const user = useQuery(ME);
 
   if (authors.loading || books.loading) {
     return <div>loading...</div>;
@@ -42,6 +56,9 @@ const App = () => {
             <Link style={padding} to="/add">
               add book
             </Link>
+            <Link style={padding} to="/recommend">
+              recommend
+            </Link>
             <Link style={padding} onClick={logout}>
               logout
             </Link>
@@ -65,7 +82,20 @@ const App = () => {
             element={<Books books={books.data.allBooks} />}
           />
           <Route path="/login" element={<LoginForm setToken={setToken} />} />
-          <Route path="/add" element={<NewBook />} />
+          <Route
+            path="/add"
+            element={token ? <NewBook /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/recommend"
+            element={
+              token ? (
+                <Recommend user={user} books={books.data.allBooks} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
         </Routes>
       </div>
     </Router>
