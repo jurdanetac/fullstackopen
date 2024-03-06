@@ -101,7 +101,10 @@ const resolvers = {
 
         return books;
       } else if (args.genre && !args.author) {
-        const books = await Book.find({ genres: args.genre });
+        const books =
+          args.genre === "all genres"
+            ? await Book.find({})
+            : await Book.find({ genres: args.genre });
 
         for (const book of books) {
           const author = await Author.findById(book.author);
@@ -111,7 +114,10 @@ const resolvers = {
         return books;
       } else if (args.genre && args.author) {
         const author = await Author.findOne({ name: args.author });
-        const books = await Book.find({ author, genres: args.genre });
+        const books =
+          args.genre === "all genres"
+            ? await Book.find({ author })
+            : await Book.find({ author, genres: args.genre });
 
         for (const book of books) {
           book.author = author;

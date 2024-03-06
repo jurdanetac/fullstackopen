@@ -1,11 +1,34 @@
 import { useState } from "react";
+import { useQuery } from "@apollo/client";
+import { ALL_BOOKS } from "../queries";
 
-const Books = ({ books }) => {
+const Books = () => {
   const [genre, setGenre] = useState("all genres");
-  const genres = books
-    .flatMap((b) => b.genres)
-    .filter((value, index, self) => self.indexOf(value) === index);
-  genres.push("all genres");
+
+  // query for all genres, hardcoded "all genres" to show all genres
+  const genreQuery = useQuery(ALL_BOOKS, {
+    variables: { genre: "all genres" },
+  });
+  // query for books of selected genre
+  const bookQuery = useQuery(ALL_BOOKS, { variables: { genre: genre } });
+
+  // genres loading
+  if (genreQuery.loading) {
+    return <div>loading...</div>;
+  }
+
+  // dissecting unique genres from books
+  const genres = genreQuery.data.allBooks.map((b) => b.genres).flat();
+  // used to show buttons for all genres
+  const uniqueGenres = [...new Set(genres), "all genres"];
+
+  // books loading
+  if (bookQuery.loading) {
+    return <div>loading...</div>;
+  }
+
+  // books to show
+  const books = bookQuery.data.allBooks.map((b) => b);
 
   return (
     <div>
@@ -21,18 +44,16 @@ const Books = ({ books }) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books
-            .filter((b) => b.genres.includes(genre) || genre === "all genres")
-            .map((a) => (
-              <tr key={a.title}>
-                <td>{a.title}</td>
-                <td>{a.author.name}</td>
-                <td>{a.published}</td>
-              </tr>
-            ))}
+          {books.map((book) => (
+            <tr key={book.title}>
+              <td>{book.title}</td>
+              <td>{book.author.name}</td>
+              <td>{book.published}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
-      {genres.map((g) => (
+      {uniqueGenres.map((g) => (
         <button key={g} onClick={() => setGenre(g)}>
           {g}
         </button>

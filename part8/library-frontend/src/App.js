@@ -77,10 +77,7 @@ const App = () => {
             path="/authors"
             element={<Authors authors={authors.data.allAuthors} />}
           />
-          <Route
-            path="/books"
-            element={<Books books={books.data.allBooks} />}
-          />
+          <Route path="/books" element={<Books />} />
           <Route path="/login" element={<LoginForm setToken={setToken} />} />
           <Route
             path="/add"
