@@ -7,10 +7,14 @@ const Books = () => {
 
   // query for all genres, hardcoded "all genres" to show all genres
   const genreQuery = useQuery(ALL_BOOKS, {
+    fetchPolicy: "network-only",
     variables: { genre: "all genres" },
   });
   // query for books of selected genre
-  const bookQuery = useQuery(ALL_BOOKS, { variables: { genre: genre } });
+  const bookQuery = useQuery(ALL_BOOKS, {
+    fetchPolicy: "network-only",
+    variables: { genre: genre },
+  });
 
   // genres loading
   if (genreQuery.loading) {

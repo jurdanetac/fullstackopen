@@ -5,6 +5,7 @@ const Recommend = ({ user }) => {
   const me = user.data.me;
 
   const booksQuery = useQuery(ALL_BOOKS, {
+    fetchPolicy: "network-only",
     variables: { genre: me.favoriteGenre },
   });
 
