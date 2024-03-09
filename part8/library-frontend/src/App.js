@@ -1,4 +1,5 @@
-import { useQuery, useApolloClient } from "@apollo/client";
+import { useApolloClient, useQuery, useSubscription } from "@apollo/client";
+
 import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -12,7 +13,7 @@ import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import LoginForm from "./components/LoginForm";
 import Recommend from "./components/Recommend";
-import { ALL_AUTHORS, ALL_BOOKS, ME } from "./queries";
+import { ALL_AUTHORS, ALL_BOOKS, ME, BOOK_ADDED } from "./queries";
 
 const App = () => {
   const [token, setToken] = useState(null);
@@ -23,6 +24,12 @@ const App = () => {
   }, []);
 
   const client = useApolloClient();
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      window.alert(`New book added: ${data.data.bookAdded.title}`);
+    },
+  });
 
   const padding = {
     padding: 5,
