@@ -1,38 +1,17 @@
 import { useState } from "react";
-import { useQuery } from "@apollo/client";
-import { ALL_BOOKS } from "../queries";
 
-const Books = () => {
+const Books = ({ books }) => {
   const [genre, setGenre] = useState("all genres");
 
-  // query for all genres, hardcoded "all genres" to show all genres
-  const genreQuery = useQuery(ALL_BOOKS, {
-    fetchPolicy: "network-only",
-    variables: { genre: "all genres" },
-  });
-  // query for books of selected genre
-  const bookQuery = useQuery(ALL_BOOKS, {
-    fetchPolicy: "network-only",
-    variables: { genre: genre },
-  });
-
-  // genres loading
-  if (genreQuery.loading) {
-    return <div>loading...</div>;
-  }
-
   // dissecting unique genres from books
-  const genres = genreQuery.data.allBooks.map((b) => b.genres).flat();
+  const genres = books.data.allBooks.map((b) => b.genres).flat();
   // used to show buttons for all genres
   const uniqueGenres = [...new Set(genres), "all genres"];
 
-  // books loading
-  if (bookQuery.loading) {
-    return <div>loading...</div>;
-  }
-
   // books to show
-  const books = bookQuery.data.allBooks.map((b) => b);
+  const booksToShow = books.data.allBooks.filter((b) =>
+    genre === "all genres" ? true : b.genres.includes(genre),
+  );
 
   return (
     <div>
@@ -48,7 +27,7 @@ const Books = () => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.map((book) => (
+          {booksToShow.map((book) => (
             <tr key={book.title}>
               <td>{book.title}</td>
               <td>{book.author.name}</td>

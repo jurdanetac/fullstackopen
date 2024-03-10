@@ -15,19 +15,38 @@ import LoginForm from "./components/LoginForm";
 import Recommend from "./components/Recommend";
 import { ALL_AUTHORS, ALL_BOOKS, ME, BOOK_ADDED } from "./queries";
 
+// function that takes care of manipulating cache
+export const updateCache = (cache, query, addedBook) => {
+  // helper that is used to eliminate saving same book twice
+  const uniqByName = (a) => {
+    let seen = new Set();
+    return a.filter((item) => {
+      let k = item.title;
+      return seen.has(k) ? false : seen.add(k);
+    });
+  };
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqByName(allBooks.concat(addedBook)),
+    };
+  });
+};
+
 const App = () => {
   const [token, setToken] = useState(null);
+  const client = useApolloClient();
 
   useEffect(() => {
     const token = localStorage.getItem("library-user-token");
     setToken(token);
   }, []);
 
-  const client = useApolloClient();
-
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
-      window.alert(`New book added: ${data.data.bookAdded.title}`);
+    onData: ({ data, client }) => {
+      const addedBook = data.data.bookAdded;
+      window.alert(`New book added: ${addedBook.title}`);
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook);
     },
   });
 
@@ -84,7 +103,7 @@ const App = () => {
             path="/authors"
             element={<Authors authors={authors.data.allAuthors} />}
           />
-          <Route path="/books" element={<Books />} />
+          <Route path="/books" element={<Books books={books} />} />
           <Route path="/login" element={<LoginForm setToken={setToken} />} />
           <Route
             path="/add"
