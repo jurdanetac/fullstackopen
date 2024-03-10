@@ -64,9 +64,8 @@ const resolvers = {
     },
   },
   Author: {
-    bookCount: async (root) => {
-      const books = await Book.find({ author: root._id });
-      return books.length;
+    bookCount: (root) => {
+      return root.books.length;
     },
   },
   Mutation: {
@@ -124,6 +123,10 @@ const resolvers = {
           },
         });
       }
+
+      author = await Author.findOne({ name: args.author });
+      author.books = author.books.concat(book);
+      await author.save();
 
       // notify subscribers of added book
       pubsub.publish("BOOK_ADDED", { bookAdded: book });
