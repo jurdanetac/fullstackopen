@@ -26,7 +26,7 @@ const parseArguments = (args: string[]): Arguments => {
   };
 };
 
-interface ExerciseValues {
+export interface ExerciseValues {
   periodLength: number;
   trainingDays: number;
   success: boolean;
@@ -36,7 +36,10 @@ interface ExerciseValues {
   average: number;
 }
 
-const calculateExercises = (dailyHours: number[], target: number): object => {
+export const calculateExercises = (
+  dailyHours: number[],
+  target: number,
+): ExerciseValues => {
   // Write a function calculateExercises that calculates the average time of
   // daily exercise hours and compares it to the target amount of daily hours
 
