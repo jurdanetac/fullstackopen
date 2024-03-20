@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DiaryEntry, NewDiaryEntry } from "./types";
 import diaryService from "./services/diaryService";
+import axios, { AxiosResponse } from "axios";
 
 const Header = ({ text }: { text: string }) => {
   return <h2>{text}</h2>;
@@ -91,8 +92,27 @@ const Entries = ({ entries }: { entries: DiaryEntry[] }) => {
   );
 };
 
+const Notification = ({ message }: { message: string }) => {
+  const style = {
+    color: "red",
+  };
+
+  if (message === "") {
+    return null;
+  }
+
+  return <p style={style}>{message}</p>;
+};
+
 const App = () => {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
+  const [notification, setNotification] = useState<string>("");
+
+  useEffect(() => {
+    setTimeout(() => {
+      setNotification("");
+    }, 10000);
+  });
 
   // form states
   const [date, setDate] = useState<string>("");
@@ -120,7 +140,14 @@ const App = () => {
     diaryService
       .createDiary(newDiaryEntry)
       .then((entry: DiaryEntry) => setEntries(entries.concat(entry)))
-      .catch((error: Error) => console.error(error));
+      .catch((error: Error) => {
+        if (axios.isAxiosError(error)) {
+          const response: AxiosResponse = error.response as AxiosResponse;
+          setNotification(String(response.data));
+        } else {
+          console.error(error);
+        }
+      });
 
     // flush inputs
     setDate("");
@@ -144,6 +171,7 @@ const App = () => {
   return (
     <div>
       <Header text="Add new entry" />
+      <Notification message={notification} />
       <Form props={formProps} />
       <Entries entries={entries} />
     </div>
