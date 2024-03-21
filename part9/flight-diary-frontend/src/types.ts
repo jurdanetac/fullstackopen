@@ -6,4 +6,8 @@ export interface DiaryEntry {
   comment: string;
 }
 
+export type Visibility = "great" | "good" | "ok" | "poor";
+
+export type Weather = "sunny" | "rainy" | "cloudy" | "windy" | "stormy";
+
 export type NewDiaryEntry = Omit<DiaryEntry, "id">;

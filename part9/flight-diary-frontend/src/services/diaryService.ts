@@ -1,7 +1,7 @@
 import axios from "axios";
 import { DiaryEntry, NewDiaryEntry } from "../types";
 
-const baseUrl = "http://localhost:3000/api/diaries";
+const baseUrl: string = "http://localhost:3000/api/diaries";
 
 const getAllDiaries: () => Promise<DiaryEntry[]> = async () => {
   return axios.get<DiaryEntry[]>(baseUrl).then((response) => response.data);

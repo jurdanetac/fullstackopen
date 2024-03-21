@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { DiaryEntry, NewDiaryEntry } from "./types";
+import React, { FC, useState, useEffect } from "react";
+import { DiaryEntry, NewDiaryEntry, Visibility, Weather } from "./types";
 import diaryService from "./services/diaryService";
 import axios, { AxiosResponse } from "axios";
 
-const Header = ({ text }: { text: string }) => {
+const Header: FC<{ text: string }> = ({ text }): JSX.Element => {
   return <h2>{text}</h2>;
 };
 
@@ -19,18 +19,19 @@ interface FormProps {
   setComment: (comment: string) => void;
 }
 
-const Form = ({ props }: { props: FormProps }) => {
-  const {
-    submitHandler,
-    date,
-    setDate,
-    visibility,
-    setVisibility,
-    weather,
-    setWeather,
-    comment,
-    setComment,
-  } = props;
+const Form: FC<FormProps> = ({
+  submitHandler,
+  date,
+  setDate,
+  visibility,
+  setVisibility,
+  weather,
+  setWeather,
+  comment,
+  setComment,
+}: FormProps): JSX.Element => {
+  const visibilities: Visibility[] = ["great", "good", "ok", "poor"];
+  const weathers: Weather[] = ["sunny", "rainy", "cloudy", "windy", "stormy"];
 
   return (
     <form onSubmit={submitHandler}>
@@ -38,25 +39,57 @@ const Form = ({ props }: { props: FormProps }) => {
       <input
         value={date}
         onChange={(event) => setDate(event.target.value)}
-        type="text"
+        type="date"
         placeholder="date"
       />
       <br />
       visibility{" "}
-      <input
-        value={visibility}
-        onChange={(event) => setVisibility(event.target.value)}
-        type="text"
-        placeholder="visibility"
-      />
+      {visibilities.map((v: Visibility, index: number) => {
+        // so that all radio buttons are in the same line
+        const style: React.CSSProperties = {
+          display: "inline",
+        };
+
+        return (
+          <div style={style} key={index}>
+            <input
+              type="radio"
+              id={v}
+              name="v"
+              value={v}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setVisibility(event.target.value)
+              }
+              checked={v === visibility}
+            />
+            <label htmlFor={v}>{v}</label>
+          </div>
+        );
+      })}
       <br />
       weather{" "}
-      <input
-        value={weather}
-        onChange={(event) => setWeather(event.target.value)}
-        type="text"
-        placeholder="weather"
-      />
+      {weathers.map((w: Weather, index: number) => {
+        // so that all radio buttons are in the same line
+        const style: React.CSSProperties = {
+          display: "inline",
+        };
+
+        return (
+          <div style={style} key={index}>
+            <input
+              type="radio"
+              id={w}
+              name="w"
+              value={w}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setWeather(event.target.value)
+              }
+              checked={w === weather}
+            />
+            <label htmlFor={w}>{w}</label>
+          </div>
+        );
+      })}
       <br />
       comment{" "}
       <input
@@ -65,13 +98,12 @@ const Form = ({ props }: { props: FormProps }) => {
         type="text"
         placeholder="comment"
       />
-      <br />
       <button type="submit">add</button>
     </form>
   );
 };
 
-const Entries = ({ entries }: { entries: DiaryEntry[] }) => {
+const Entries: FC<{ entries: DiaryEntry[] }> = ({ entries }): JSX.Element => {
   return (
     <div>
       <h2>Entries</h2>
@@ -92,8 +124,10 @@ const Entries = ({ entries }: { entries: DiaryEntry[] }) => {
   );
 };
 
-const Notification = ({ message }: { message: string }) => {
-  const style = {
+const Notification: FC<{ message: string }> = ({
+  message,
+}): JSX.Element | null => {
+  const style: React.CSSProperties = {
     color: "red",
   };
 
@@ -104,7 +138,7 @@ const Notification = ({ message }: { message: string }) => {
   return <p style={style}>{message}</p>;
 };
 
-const App = () => {
+const App: FC = (): JSX.Element => {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [notification, setNotification] = useState<string>("");
 
@@ -127,7 +161,7 @@ const App = () => {
       .catch((error: Error) => console.error(error));
   }, []);
 
-  const submitHandler = (event: React.SyntheticEvent) => {
+  const submitHandler: (event: React.SyntheticEvent) => void = (event) => {
     event.preventDefault();
 
     const newDiaryEntry: NewDiaryEntry = {
@@ -172,7 +206,7 @@ const App = () => {
     <div>
       <Header text="Add new entry" />
       <Notification message={notification} />
-      <Form props={formProps} />
+      <Form {...formProps} />
       <Entries entries={entries} />
     </div>
   );
