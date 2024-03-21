@@ -1,6 +1,6 @@
 import express from "express";
 
-import { toNewPatientEntry } from "../utils";
+import { toNewPatient } from "../utils";
 import patientService from "../services/patientService";
 
 const router = express.Router();
@@ -11,8 +11,8 @@ router.get("/", (_req, res) => {
 
 router.post("/", (req, res) => {
   try {
-    const newPatientEntry = toNewPatientEntry(req.body);
-    const addedEntry = patientService.addPatient(newPatientEntry);
+    const newPatient = toNewPatient(req.body);
+    const addedEntry = patientService.addPatient(newPatient);
     res.json(addedEntry);
   } catch (error: unknown) {
     let errorMessage = "Something went wrong.";
@@ -21,6 +21,11 @@ router.post("/", (req, res) => {
     }
     res.status(400).send(errorMessage);
   }
+});
+
+router.get("/:id", (req, res) => {
+  const patient = patientService.getPatient(req.params.id);
+  res.send(patient);
 });
 
 export default router;
