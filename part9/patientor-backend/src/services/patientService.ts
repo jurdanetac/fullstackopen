@@ -12,7 +12,7 @@ const getEntries = (): Patient[] => {
 
 const getNonSensitiveEntries = (): NonSensitivePatient[] => {
   return entries.map((e) => {
-    return { ...e, ssn: undefined };
+    return { ...e, ssn: undefined, entries: [] };
   });
 };
 
