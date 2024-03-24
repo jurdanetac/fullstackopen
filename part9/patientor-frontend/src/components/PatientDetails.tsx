@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Patient } from "../types";
 import patientService from "../services/patients";
+import diagnosesService from "../services/diagnoses";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
-import { Entry } from "../types";
+import { Entry, Diagnosis } from "../types";
 
 const PatientDetails = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
   const id: string | undefined = useParams<{ id: string }>().id;
 
@@ -25,6 +27,12 @@ const PatientDetails = () => {
       }
     });
   }, [id]);
+
+  useEffect(() => {
+    void diagnosesService.getAll().then((diagnoses: Diagnosis[]) => {
+      setDiagnoses(diagnoses);
+    });
+  }, []);
 
   if (!patient) {
     return <div>Loading...</div>;
@@ -54,7 +62,11 @@ const PatientDetails = () => {
             {entry.date} {entry.description}
           </p>
           <ul>
-            {entry.diagnosisCodes?.map((code) => <li key={code}>{code}</li>)}
+            {entry.diagnosisCodes?.map((code) => (
+              <li key={code}>
+                {code} {diagnoses.find((d) => d.code === code)?.name}
+              </li>
+            ))}
           </ul>
         </div>
       ))}
