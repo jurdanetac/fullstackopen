@@ -5,6 +5,7 @@ import { Patient } from "../types";
 import patientService from "../services/patients";
 import MaleIcon from "@mui/icons-material/Male";
 import FemaleIcon from "@mui/icons-material/Female";
+import { Entry } from "../types";
 
 const PatientDetails = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -12,8 +13,16 @@ const PatientDetails = () => {
   const id: string | undefined = useParams<{ id: string }>().id;
 
   useEffect(() => {
+    if (!id) {
+      return;
+    }
+
     void patientService.getPatient(id).then((patient: Patient) => {
-      setPatient(patient);
+      if (patient) {
+        setPatient(patient);
+      } else {
+        setPatient(null);
+      }
     });
   }, [id]);
 
@@ -38,6 +47,17 @@ const PatientDetails = () => {
         <br />
         occupation: {patient.occupation}
       </p>
+      <h3>entries</h3>
+      {patient.entries.map((entry: Entry) => (
+        <div key={entry.id}>
+          <p>
+            {entry.date} {entry.description}
+          </p>
+          <ul>
+            {entry.diagnosisCodes?.map((code) => <li key={code}>{code}</li>)}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 };
