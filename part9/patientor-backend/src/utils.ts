@@ -14,6 +14,14 @@ const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
 };
 
+const isObject = (param: unknown): param is object => {
+  return typeof param === "object";
+};
+
+const isNumber = (param: unknown): param is number => {
+  return typeof param === "number";
+};
+
 const isDate = (date: string): boolean => {
   return Boolean(Date.parse(date));
 };
@@ -30,10 +38,6 @@ const isType = (param: string): param is validEntryType => {
     .includes(param);
 };
 
-const isObject = (object: unknown): object is object => {
-  return typeof object === "object";
-};
-
 const isDischarge = (discharge: object): discharge is Discharge => {
   if (
     "date" in discharge &&
@@ -48,12 +52,25 @@ const isDischarge = (discharge: object): discharge is Discharge => {
   return false;
 };
 
-const isHealthCheckRating = (param: unknown): param is HealthCheckRating => {
-  if (isNaN(Number(param))) {
-    return false;
+const isHealthCheckRating = (param: number): param is HealthCheckRating => {
+  return Object.values(HealthCheckRating)
+    .map((v) => v)
+    .includes(param);
+};
+
+const isSickLeave = (sickLeave: object): sickLeave is SickLeave => {
+  if (
+    "startDate" in sickLeave &&
+    isString(sickLeave.startDate) &&
+    isDate(sickLeave.startDate) &&
+    "endDate" in sickLeave &&
+    isString(sickLeave.endDate) &&
+    isDate(sickLeave.endDate)
+  ) {
+    return true;
   }
 
-  return Object.values(HealthCheckRating).includes(Number(param));
+  return false;
 };
 
 const parseDischarge = (discharge: unknown): Discharge => {
@@ -67,13 +84,15 @@ const parseDischarge = (discharge: unknown): Discharge => {
 const parseHealthCheckRating = (
   healthCheckRating: unknown,
 ): HealthCheckRating => {
-  if (!isHealthCheckRating(healthCheckRating)) {
+  const rating = Number(healthCheckRating);
+
+  if (!rating || !isNumber(rating) || !isHealthCheckRating(rating)) {
     throw new Error(
       "Incorrect or missing health check rating: " + healthCheckRating,
     );
   }
 
-  return healthCheckRating;
+  return rating;
 };
 
 const parseEmployerName = (employerName: unknown): string => {
@@ -82,25 +101,6 @@ const parseEmployerName = (employerName: unknown): string => {
   }
 
   return employerName;
-};
-
-const isSickLeave = (sickLeave: unknown): sickLeave is SickLeave => {
-  if (!isObject(sickLeave)) {
-    return false;
-  }
-
-  if (
-    "startDate" in sickLeave &&
-    isString(sickLeave.startDate) &&
-    isDate(sickLeave.startDate) &&
-    "endDate" in sickLeave &&
-    isString(sickLeave.endDate) &&
-    isDate(sickLeave.endDate)
-  ) {
-    return true;
-  }
-
-  return false;
 };
 
 const parseSickLeave = (sickLeave: unknown): SickLeave => {
@@ -150,35 +150,8 @@ const parseOccupation = (occupation: unknown): string => {
   return occupation;
 };
 
-export const toNewPatient = (object: unknown): NewPatient => {
-  if (!isObject(object)) {
-    throw new Error("Incorrect or missing data");
-  }
-
-  if (
-    "name" in object &&
-    "ssn" in object &&
-    "dateOfBirth" in object &&
-    "gender" in object &&
-    "occupation" in object
-  ) {
-    const newEntry: NewPatient = {
-      name: parseName(object.name),
-      ssn: parseSSN(object.ssn),
-      dateOfBirth: parseDateOfBirth(object.dateOfBirth),
-      gender: parseGender(object.gender),
-      occupation: parseOccupation(object.occupation),
-      entries: [],
-    };
-
-    return newEntry;
-  }
-
-  throw new Error("Incorrect data: some fields are missing");
-};
-
 const parseDescription = (description: unknown): string => {
-  if (!isString(description)) {
+  if (!description || !isString(description)) {
     throw new Error("Incorrect or missing description: " + description);
   }
 
@@ -186,7 +159,7 @@ const parseDescription = (description: unknown): string => {
 };
 
 const parseDate = (date: unknown): string => {
-  if (!isString(date) || !isDate(date)) {
+  if (!date || !isString(date) || !isDate(date)) {
     throw new Error("Incorrect or missing date: " + date);
   }
 
@@ -194,7 +167,7 @@ const parseDate = (date: unknown): string => {
 };
 
 const parseSpecialist = (specialist: unknown): string => {
-  if (!isString(specialist)) {
+  if (!specialist || !isString(specialist)) {
     throw new Error("Incorrect or missing specialist: " + specialist);
   }
 
@@ -294,6 +267,33 @@ export const toNewEntry = (object: unknown): NewEntry => {
       default:
         throw new Error("Incorrect or missing type: " + type);
     }
+  }
+
+  throw new Error("Incorrect data: some fields are missing");
+};
+
+export const toNewPatient = (object: unknown): NewPatient => {
+  if (!isObject(object)) {
+    throw new Error("Incorrect or missing data");
+  }
+
+  if (
+    "name" in object &&
+    "ssn" in object &&
+    "dateOfBirth" in object &&
+    "gender" in object &&
+    "occupation" in object
+  ) {
+    const newEntry: NewPatient = {
+      name: parseName(object.name),
+      ssn: parseSSN(object.ssn),
+      dateOfBirth: parseDateOfBirth(object.dateOfBirth),
+      gender: parseGender(object.gender),
+      occupation: parseOccupation(object.occupation),
+      entries: [],
+    };
+
+    return newEntry;
   }
 
   throw new Error("Incorrect data: some fields are missing");
