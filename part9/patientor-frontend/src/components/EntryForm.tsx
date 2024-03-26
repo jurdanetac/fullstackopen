@@ -1,6 +1,13 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { Patient, NewEntry, validEntryType } from "../types";
+import { DateInput, TextInput } from "./Inputs";
+import { assertNever } from "../utils";
+import useNotification from "../hooks/useNotification";
+import patientService from "../services/patients";
+import diagnosesService from "../services/diagnoses";
+import MultipleSelect from "./MultipleSelect";
 import {
   TextField,
   Alert,
@@ -12,43 +19,64 @@ import {
   Button,
 } from "@mui/material";
 
-import { Patient, NewEntry, validEntryType } from "../types";
-import patientService from "../services/patients";
+const EntryChooser: React.FC<{
+  type: validEntryType;
+  setType: (type: validEntryType) => void;
+}> = ({ type, setType }) => {
+  const radioButtonsInlineStyle: React.CSSProperties = {
+    display: "inline",
+  };
 
-const assertNever = (value: never): never => {
-  throw new Error(
-    `Unhandled discriminated union member: ${JSON.stringify(value)}`,
+  return (
+    <FormControl>
+      <FormLabel id="demo-radio-buttons-group-label">Entry Type</FormLabel>
+      <RadioGroup
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        name="radio-buttons-group"
+        style={radioButtonsInlineStyle}
+      >
+        <FormControlLabel
+          value={validEntryType.HealthCheck}
+          control={<Radio />}
+          label="Health Check"
+        />
+        <FormControlLabel
+          value={validEntryType.Hospital}
+          control={<Radio />}
+          label="Hospital"
+        />
+        <FormControlLabel
+          value={validEntryType.OccupationalHealthcare}
+          control={<Radio />}
+          label="Occupational Health Care"
+        />
+      </RadioGroup>
+    </FormControl>
   );
 };
 
-const useNotification = (): [string | null, (notification: string) => void] => {
-  const [value, setValue] = useState<string | null>(null);
-
-  const setNotification = (notification: string) => {
-    setValue(notification);
-    setTimeout(() => {
-      setValue(null);
-    }, 5000);
-  };
-
-  return [value, setNotification];
-};
-
-const EntryForm: React.FC<{
+const NewEntryComponent: React.FC<{
   patient: Patient;
   setPatient: (patient: Patient) => void;
-}> = ({ patient, setPatient }) => {
-  const [notification, setNotification] = useNotification();
-
+  setNotification: (notification: string) => void;
+}> = ({ patient, setPatient, setNotification }) => {
   // base entry
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [specialist, setSpecialist] = useState<string>("");
-  const [codes, setCodes] = useState<string>("");
-
+  const [codes, setCodes] = useState<string[]>([]);
   const [type, setType] = useState<validEntryType>(validEntryType.HealthCheck);
   // health check
   const [rating, setRating] = useState<string>("");
+  // handler for input
+  const ratingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value === "") {
+      setRating("");
+    } else if (parseInt(e.target.value) >= 0 && parseInt(e.target.value) <= 3) {
+      setRating(e.target.value);
+    }
+  };
   // hospital
   const [dateDischarged, setDateDischarged] = useState<string>("");
   const [criteria, setCriteria] = useState<string>("");
@@ -57,12 +85,22 @@ const EntryForm: React.FC<{
   const [sickLeaveStart, setSickLeaveStart] = useState<string>("");
   const [sickLeaveEnd, setSickLeaveEnd] = useState<string>("");
 
+  const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchDiagnoses = async () => {
+      const diagnoses = await diagnosesService.getAll();
+      setDiagnosisCodes(diagnoses.map((d) => d.code));
+    };
+    fetchDiagnoses();
+  }, []);
+
   const submit = async () => {
     const baseEntry: object = {
       description,
       date,
       specialist,
-      diagnosisCodes: codes.split(", "),
+      diagnosisCodes: codes,
     };
 
     let newEntry: NewEntry;
@@ -118,7 +156,7 @@ const EntryForm: React.FC<{
       setPatient(updatedPatient);
 
       // clear all fields after successful submission
-      setCodes("");
+      setCodes([]);
       setDescription("");
       setDate("");
       setRating("");
@@ -148,158 +186,120 @@ const EntryForm: React.FC<{
     }
   };
 
-  const entryContainerStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-    marginBottom: "1rem",
-  };
+  return (
+    <div
+      style={{
+        border: "1px solid black",
+        padding: "1rem",
+      }}
+    >
+      <h3>New {type} entry</h3>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+          marginBottom: "1rem",
+        }}
+      >
+        <EntryChooser type={type} setType={setType} />
+        <TextInput
+          value={description}
+          setter={setDescription}
+          label="Description"
+        />
+        <DateInput label="Date" date={date} setDate={setDate} />
+        <TextInput
+          value={specialist}
+          setter={setSpecialist}
+          label="Specialist"
+        />
+        <MultipleSelect
+          code={codes}
+          setCode={setCodes}
+          codes={diagnosisCodes}
+        />
 
-  const formStyle: React.CSSProperties = {
-    border: "1px solid black",
-    padding: "1rem",
-  };
+        {type === validEntryType.HealthCheck ? (
+          <TextField
+            value={rating}
+            onChange={(e) => ratingChange(e)}
+            id="rating"
+            label="Rating"
+            variant="standard"
+            type="number"
+          />
+        ) : null}
+        {type === validEntryType.Hospital ? (
+          <>
+            <DateInput
+              label="Discharge Date"
+              date={dateDischarged}
+              setDate={setDateDischarged}
+            />
+            <TextInput value={criteria} setter={setCriteria} label="Criteria" />
+          </>
+        ) : null}
+        {type === validEntryType.OccupationalHealthcare ? (
+          <>
+            <TextInput
+              value={employerName}
+              setter={setEmployerName}
+              label="Employer Name"
+            />
+            <DateInput
+              label="Sick Leave Start"
+              date={sickLeaveStart}
+              setDate={setSickLeaveStart}
+            />
+            <DateInput
+              label="Sick Leave End"
+              date={sickLeaveEnd}
+              setDate={setSickLeaveEnd}
+            />
+          </>
+        ) : null}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Button variant="contained" color="error">
+          Cancel
+        </Button>
+        <Button variant="contained" color="success" onClick={submit}>
+          Add
+        </Button>
+      </div>
+    </div>
+  );
+};
 
-  const buttonContainerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "space-between",
-  };
-
-  const alertStyle: React.CSSProperties = {
-    marginBottom: "1rem",
-  };
-
-  const radioButtonsInlineStyle: React.CSSProperties = {
-    display: "inline",
-  };
+const EntryForm: React.FC<{
+  patient: Patient;
+  setPatient: (patient: Patient) => void;
+}> = ({ patient, setPatient }) => {
+  const [notification, setNotification] = useNotification();
 
   return (
     <>
       {notification ? (
-        <Alert severity="error" style={alertStyle}>
+        <Alert
+          severity="error"
+          style={{
+            marginBottom: "1rem",
+          }}
+        >
           {notification}
         </Alert>
       ) : null}
-      <div style={formStyle}>
-        <h3>New {type} entry</h3>
-        <div style={entryContainerStyle}>
-          <FormControl>
-            <FormLabel id="demo-radio-buttons-group-label">
-              Entry Type
-            </FormLabel>
-            <RadioGroup
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              name="radio-buttons-group"
-              style={radioButtonsInlineStyle}
-            >
-              <FormControlLabel
-                value={validEntryType.HealthCheck}
-                control={<Radio />}
-                label="Health Check"
-              />
-              <FormControlLabel
-                value={validEntryType.Hospital}
-                control={<Radio />}
-                label="Hospital"
-              />
-              <FormControlLabel
-                value={validEntryType.OccupationalHealthcare}
-                control={<Radio />}
-                label="Occupational Health Care"
-              />
-            </RadioGroup>
-          </FormControl>
-          <TextField
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            id="description"
-            label="Description"
-            variant="standard"
-          />
-          <TextField
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            id="date"
-            label="Date"
-            variant="standard"
-          />
-          <TextField
-            value={specialist}
-            onChange={(e) => setSpecialist(e.target.value)}
-            id="specialist"
-            label="Specialist"
-            variant="standard"
-          />
-          <TextField
-            value={codes}
-            onChange={(e) => setCodes(e.target.value)}
-            id="codes"
-            label="Codes"
-            variant="standard"
-          />
-          {type === validEntryType.HealthCheck ? (
-            <TextField
-              value={rating}
-              onChange={(e) => setRating(e.target.value)}
-              id="rating"
-              label="Rating"
-              variant="standard"
-            />
-          ) : null}
-          {type === validEntryType.Hospital ? (
-            <>
-              <TextField
-                value={dateDischarged}
-                onChange={(e) => setDateDischarged(e.target.value)}
-                id="dateDischarge"
-                label="Discharge Date"
-                variant="standard"
-              />
-              <TextField
-                value={criteria}
-                onChange={(e) => setCriteria(e.target.value)}
-                id="criteria"
-                label="Discharge Criteria"
-                variant="standard"
-              />
-            </>
-          ) : null}
-          {type === validEntryType.OccupationalHealthcare ? (
-            <>
-              <TextField
-                value={employerName}
-                onChange={(e) => setEmployerName(e.target.value)}
-                id="employerName"
-                label="Employer Name"
-                variant="standard"
-              />
-              <TextField
-                value={sickLeaveStart}
-                onChange={(e) => setSickLeaveStart(e.target.value)}
-                id="sickLeaveStart"
-                label="Sick Leave Start"
-                variant="standard"
-              />
-              <TextField
-                value={sickLeaveEnd}
-                onChange={(e) => setSickLeaveEnd(e.target.value)}
-                id="sickLeaveEnd"
-                label="Sick Leave End"
-                variant="standard"
-              />
-            </>
-          ) : null}
-        </div>
-        <div style={buttonContainerStyle}>
-          <Button variant="contained" color="error">
-            Cancel
-          </Button>
-          <Button variant="contained" color="success" onClick={submit}>
-            Add
-          </Button>
-        </div>
-      </div>
+      <NewEntryComponent
+        setNotification={setNotification}
+        patient={patient}
+        setPatient={setPatient}
+      />
     </>
   );
 };

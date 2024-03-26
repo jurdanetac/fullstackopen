@@ -86,7 +86,7 @@ const parseHealthCheckRating = (
 ): HealthCheckRating => {
   const rating = Number(healthCheckRating);
 
-  if (!rating || !isNumber(rating) || !isHealthCheckRating(rating)) {
+  if (!isNumber(rating) || !isHealthCheckRating(rating)) {
     throw new Error(
       "Incorrect or missing health check rating: " + healthCheckRating,
     );
