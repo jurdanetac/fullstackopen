@@ -7,3 +7,6 @@
 [submodule "part5"]
 	path = part5
 	url = https://github.com/jurdanetac/bloglist-frontend.git
+[submodule "part12"]
+	path = part12
+	url = https://github.com/jurdanetac/containers.git
