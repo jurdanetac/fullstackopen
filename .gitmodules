@@ -13,3 +13,6 @@
 [submodule "part13"]
 	path = part13
 	url = https://github.com/jurdanetac/relationaldbs
+[submodule "part11/full-stack-open-pokedex"]
+	path = part11/full-stack-open-pokedex
+	url = https://github.com/jurdanetac/full-stack-open-pokedex
