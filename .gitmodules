@@ -16,3 +16,6 @@
 [submodule "part11/full-stack-open-pokedex"]
 	path = part11/full-stack-open-pokedex
 	url = https://github.com/jurdanetac/full-stack-open-pokedex
+[submodule "part11/phonebook-cicd"]
+	path = part11/phonebook-cicd
+	url = https://github.com/jurdanetac/phonebook-cicd
