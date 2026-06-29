@@ -22,3 +22,6 @@
 [submodule "part10"]
 	path = part10
 	url = https://github.com/jurdanetac/react-native.git
+[submodule "part14"]
+	path = part14
+	url = git@github.com:jurdanetac/Nextjs.git
